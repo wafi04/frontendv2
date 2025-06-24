@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ReactQueryProvider } from "@/components/layouts/reactQuery";
 import { URL_LOGO } from "@/constants";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Vazzuniverse - Top up terpercaya se-universe",
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body>
         <ReactQueryProvider>
           {children}
+          <Toaster />
       </ReactQueryProvider>
       </body>
     </html>

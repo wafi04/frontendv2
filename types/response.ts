@@ -15,21 +15,22 @@ export interface ErrorResponse {
 export type API_RESPONSE<T> = {
   message: string;
   data: T;
-  statusCode: number;
+  status: boolean;
 };
 
-export type PaginationResponse<T> = {
-  pages: T;
-  pageParams: number;
-};
 
-export type Pagination = {
-  page: number;
-  perPage: number;
-  totalPages: number;
-  totalItems: number;
-};
 
 export type CountResponse = {
   count: number;
 };
+
+
+export interface PaginationParams {
+  limit?: string
+  page?: string
+}
+
+export interface FilterCategories extends PaginationParams {
+  search?: string
+  status?: string
+}
