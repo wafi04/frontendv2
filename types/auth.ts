@@ -23,3 +23,17 @@ export const updateUser = z.object({
 export type loginAuth = z.infer<typeof loginSchema>;
 export type RegisterAuth = z.infer<typeof registerSchema>;
 export type UpdateUser = z.infer<typeof updateUser>;
+export type UserData = {
+  id: number; 
+  name: string | null;
+  username: string;
+  role: string;
+  whatsapp: string | null;
+  balance: number;
+  apiKey: string | null;
+  otp: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  lastPaymentAt: string | null;
+
+};

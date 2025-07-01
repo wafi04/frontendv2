@@ -19,7 +19,18 @@ export function useGetCategories() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
-
+export function useGetCategoriesByType(type: string) {
+  return useQuery({
+    queryKey: ["categories","type",type],
+    queryFn: async (): Promise<CategoryResponse> => {
+      const response = await api.get<API_RESPONSE<CategoryData[]>>(
+        `/category/type/${type}`
+      );
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000, 
+  });
+}
 export function useGetCategoryPagination(data: FilterCategories) {
   return useQuery({
     queryKey: ["categories", "pagination", data], // Include data in queryKey untuk auto-refetch

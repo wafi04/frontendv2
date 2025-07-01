@@ -21,7 +21,7 @@ export function useGetSubCategories() {
 
 export function useGetSubCategoryPagination(data: FilterSubCategories) {
   return useQuery({
-    queryKey: ["categories", "pagination", data], // Include data in queryKey untuk auto-refetch
+    queryKey: ["subcategories", "pagination", data], // Include data in queryKey untuk auto-refetch
     queryFn: async (): Promise<SubCategoryReseponseWithPagination> => {
       // Build query params properly
       const params = new URLSearchParams()

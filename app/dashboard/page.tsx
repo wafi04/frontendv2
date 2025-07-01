@@ -14,7 +14,7 @@ import { useState } from "react";
 export default function Page() {
   const [selectedTab, setSelectedTab] = useState("overview");
   return (
-    <main className="flex flex-col gap-6 p-6 bg-background">
+    <main className="flex flex-col gap-6  bg-background">
       <div className="flex items-center justify-between">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
@@ -96,7 +96,7 @@ export default function Page() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-primary">
-                  {1000 ? Math.round((10 / 100) * 100) : 0}%
+                  {parseInt("1000") ? Math.round((10 / 100) * 100) : 0}%
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {100} successful transactions

@@ -47,16 +47,15 @@ function SidebarNav({ items, isCollapsed = false }: SidebarNavProps) {
 
   const isActive = (path?: string) => {
     if (!path) return false;
-    return pathname === path || pathname.startsWith(path + "/");
+    return pathname === path; // hanya cocok jika persis sama
   };
-
   const hasActiveChild = (children?: NavItem[]) => {
     if (!children) return false;
     return children.some((child) => isActive(child.path));
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 mt-2">
       {items.map((item) => {
         const isItemActive = isActive(item.path);
         const hasActiveChildren = hasActiveChild(item.children);
@@ -267,7 +266,7 @@ export function SidebarAdminInternal({
       {/* Desktop Sidebar */}
       <div
         className={cn(
-          "hidden md:flex fixed left-0 top-0 z-30 h-full bg-background border-r transition-all duration-300",
+          "hidden md:flex fixed left-0 top-0 mt-5 z-30 h-full bg-background border-r transition-all duration-300",
           isCollapsed ? "w-16" : "w-64",
           className
         )}
