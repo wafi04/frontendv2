@@ -1,9 +1,7 @@
 import {
-  ClipboardList,
   LayoutDashboard,
   Package,
   PackageSearch,
-  Settings,
   ShoppingCart,
   Users,
   Wallet,
@@ -78,13 +76,7 @@ export const dataNavAdmin: NavItem[] = [
   },
   {
     nama: "Metode",
-    path: "/dashboard/methode",
+    path: "/dashboard/payment-method",
     icon: <Wallet className="size-4" />,
-  },
-
-  {
-    nama: "General",
-    path: "/dashboard/general",
-    icon: <Settings className="h-5 w-5" />,
   },
 ];

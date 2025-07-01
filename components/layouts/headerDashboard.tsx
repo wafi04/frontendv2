@@ -8,7 +8,7 @@ interface HeaderDashboardProps {
 }
 export function HeaderDashboard(props: HeaderDashboardProps) {
   return (
-    <section className="flex items-center justify-between">
+    <section className="flex items-center justify-between p-4">
       <div className="flex flex-col gap-3">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}

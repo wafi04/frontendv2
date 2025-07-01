@@ -21,7 +21,7 @@ export function useGetSubCategories() {
 
 export function useGetSubCategoryPagination(data: FilterSubCategories) {
   return useQuery({
-    queryKey: ["categories", "pagination", data], // Include data in queryKey untuk auto-refetch
+    queryKey: ["subcategories", "pagination", data], // Include data in queryKey untuk auto-refetch
     queryFn: async (): Promise<SubCategoryReseponseWithPagination> => {
       // Build query params properly
       const params = new URLSearchParams()
@@ -111,6 +111,7 @@ export function useUpdateSubCategory() {
       
       // Invalidate list cache
       queryClient.invalidateQueries({ queryKey: ["subcategories"] });
+      queryClient.invalidateQueries({ queryKey: ["subcategories"] });
       
       toast.success(data.message || "SubCategory updated successfully");
     },
@@ -164,92 +165,6 @@ export function useDeleteSubCategory() {
   });
 }
 
-// BULK DELETE SUBCATEGORIES (Optional - if you need it)
-export function useBulkDeleteSubCategories() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (ids: number[]) => {
-      const promises = ids.map(id => 
-        api.delete<API_RESPONSE<SubCategory>>(`/subcategory/${id}`)
-      );
-      const responses = await Promise.all(promises);
-      return responses.map(response => response.data);
-    },
-    onSuccess: (data, ids) => {
-      // Remove from specific caches
-      ids.forEach(id => {
-        queryClient.removeQueries({ queryKey: ["subcategory", id] });
-      });
-      
-      // Invalidate list cache
-      queryClient.invalidateQueries({ queryKey: ["subcategories"] });
-      
-      toast.success(`${ids.length} subcategories deleted successfully`);
-    },
-    onError: (error: any) => {
-      const errorMessage = "Failed to delete some subcategories";
-      toast.error(errorMessage);
-    },
-  });
-}
 
-// PREFETCH SUBCATEGORY (for better UX)
-export function usePrefetchSubCategory() {
-  const queryClient = useQueryClient();
-  
-  return (id: number) => {
-    queryClient.prefetchQuery({
-      queryKey: ["subcategory", id],
-      queryFn: async () => {
-        const response = await api.get<API_RESPONSE<SubCategory>>(`/subcategory/${id}`);
-        return response.data;
-      },
-      staleTime: 5 * 60 * 1000,
-    });
-  };
-}
 
-// SEARCH SUBCATEGORIES (if you want to add search functionality)
-export function useSearchSubCategories(searchTerm: string) {
-  return useQuery({
-    queryKey: ["subcategories", "search", searchTerm],
-    queryFn: async () => {
-      const response = await api.get<API_RESPONSE<SubCategory[]>>(
-        `/subcategory?search=${encodeURIComponent(searchTerm)}`
-      );
-      return response.data;
-    },
-    enabled: searchTerm.length > 0,
-    staleTime: 30 * 1000, // 30 seconds for search results
-  });
-}
 
-// CUSTOM HOOK FOR FORM INTEGRATION
-export function useSubCategoryForm() {
-  const createMutation = useCreateSubCategory();
-  const updateMutation = useUpdateSubCategory();
-  
-  const handleSubmit = async (
-    data: FormValuesSubCategory, 
-    id?: number
-  ) => {
-    try {
-      if (id) {
-        await updateMutation.mutateAsync({ id, data });
-      } else {
-        await createMutation.mutateAsync(data);
-      }
-      return true;
-    } catch (error) {
-      return false;
-    }
-  };
-  
-  return {
-    handleSubmit,
-    isLoading: createMutation.isPending || updateMutation.isPending,
-    isSuccess: createMutation.isSuccess || updateMutation.isSuccess,
-    error: createMutation.error || updateMutation.error,
-  };
-}
