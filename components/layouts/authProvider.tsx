@@ -40,7 +40,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const contextValue: AuthContextType = {
         user: data?.data || null,
         isLoading,
-        isAuthenticated: !!data?.data && data?.status,
+        isAuthenticated: !!data?.data && data?.success,
         error,
         logout,
     };

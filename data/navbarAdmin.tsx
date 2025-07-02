@@ -30,6 +30,10 @@ export const dataNavAdmin: NavItem[] = [
         path: "/dashboard/transactions",
       },
       {
+        nama: "Logs transactions",
+        path: "/dashboard/logs",
+      },
+      {
         nama: "Manual Transactions",
         path: "/dashboard/manual-transactions",
       },

@@ -1,12 +1,18 @@
 import { HeroSection } from "@/app/order/[slug]/order/HeroSection"
 import { SidebarOrder } from "@/app/order/[slug]/order/sidebar"
-import { HeaderNumber } from "@/components/custom/headerNumber"
 import { Navbar } from "@/components/custom/navbar"
-import { PlaceholderContent } from "@/components/custom/placeholderContent"
 import { BACKEND_URL } from "@/constants"
 import { CategoryData } from "@/types/category"
 import axios from "axios"
 import { OrderStep } from "./order"
+import { Footer } from "@/components/layouts/footer"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "Order - Vazzuniverse",
+    description: 'Vazzuniverse adalah sebuah penyedia layanan top up games dengan harga termurah dan proses super instan. Dapatkan lebih banyak promo dan potongan harga dengan cara bergabung menjadi Reseller.'
+}
+
 
 export interface CategoryWithSubCategories extends CategoryData {
     subCategories: {
@@ -35,7 +41,7 @@ export default async function Page({ params }: { params: { slug: string | undefi
                     <OrderStep data={dataCategoryCode} />
                 </section>
             </main>
-
+            <Footer />
         </>
     )
 }

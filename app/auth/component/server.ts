@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@/lib/axios";
-import { loginAuth, RegisterAuth } from "@/types/auth";
+import { loginAuth, RegisterAuth, UserResponse } from "@/types/auth";
 import { API_RESPONSE, ErrorResponse } from "@/types/response";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -53,14 +53,16 @@ export const useRegisterMutation = () => {
 export const useLoginMutation = () => {
   const queryClient = useQueryClient();
   const push = useRouter();
-
   return useMutation({
     mutationKey: ["login"],
     mutationFn: async (data: loginAuth) => {
-      const res = await api.post(
+      const res = await api.post<API_RESPONSE<UserResponse>>(
         "/auth/login",
         data
       );
+      if(res.success){
+        window.location.href = "/"
+      }
       return res.data;
     },
     onError: (error: ErrorResponse) => {

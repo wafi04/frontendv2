@@ -14,8 +14,10 @@ export interface ErrorResponse {
 
 export type API_RESPONSE<T> = {
   message: string;
+  code : number
+  success : boolean
   data: T;
-  status: boolean;
+  status?: boolean;
 };
 
 

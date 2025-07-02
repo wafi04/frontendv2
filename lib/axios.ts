@@ -79,8 +79,9 @@ export class Api {
         headers: this.getHeaders(config),
       });
       return {
+                success : response.success,
         data: response.data,
-        statusCode: response.status,
+        code: response.status,
         message: response.statusText,
       };
     } catch (error) {
@@ -108,8 +109,9 @@ export class Api {
         }
       );
       return {
+                success : response.success,
         data: response.data,
-        statusCode: response.status,
+        code: response.status,
         message: response.statusText,
       };
     } catch (error) {
@@ -136,8 +138,9 @@ export class Api {
         }
       );
       return {
+        success : response.success,
         data: response.data,
-        statusCode: response.status,
+        code: response.status,
         message: response.statusText,
       };
     } catch (error) {
@@ -161,8 +164,10 @@ export class Api {
         }
       );
       return {
+                success : response.success,
+
         data: response.data,
-        statusCode: response.status,
+        code: response.status,
         message: response.statusText,
       };
     } catch (error) {
@@ -179,8 +184,10 @@ export class Api {
         headers: this.getHeaders(config),
       });
       return {
+                success : response.success,
+
         data: response.data,
-        statusCode: response.status,
+        code: response.status,
         message: response.statusText,
       };
     } catch (error) {

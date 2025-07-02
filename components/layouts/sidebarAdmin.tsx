@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   Collapsible,
   CollapsibleContent,
@@ -246,20 +246,24 @@ export function SidebarAdminInternal({
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="flex flex-col p-0">
-          <div className="flex h-full flex-col">
-            <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-              <Link
+          <SheetHeader className="px-3"> 
+              <SheetTitle>
+               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 font-semibold"
+                className="flex items-center gap-2 px-3 mt-3 font-semibold"
               >
                 <Package className="h-6 w-6" />
-                <span>Admin Panel</span>
+                <SheetDescription>
+                    Admin Panel
+              </SheetDescription>
               </Link>
-            </div>
-            <ScrollArea className="flex-1 px-3 py-4">
+              
+              </SheetTitle>
+          </SheetHeader>
+  
+            <ScrollArea className="flex-1 px-3 ">
               <SidebarNav items={dataNavAdmin} />
             </ScrollArea>
-          </div>
         </SheetContent>
       </Sheet>
 

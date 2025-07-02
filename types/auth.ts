@@ -37,3 +37,14 @@ export type UserData = {
   lastPaymentAt: string | null;
 
 };
+
+export interface UserResponse {
+  id: number;
+  name: string;
+  username: string;
+  whatsapp?: string | null
+  createdAt: Date;
+  balance?: number;
+  role: string;
+  apiKey?: string | null;
+}

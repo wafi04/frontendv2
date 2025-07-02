@@ -16,7 +16,6 @@ export function HeaderFilterProduct({
 }) {
     const { setFilter } = useFilterProduct();
     const [selected, setSelected] = useState<number | null>(null);
-
     const handleSelect = (id: number) => {
         setSelected(id);
         setFilter(id);

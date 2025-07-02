@@ -12,6 +12,7 @@ import { ProductPage } from "@/app/order/[slug]/order/serviceSection";
 import { MethodSection } from "./payment-method";
 import WhatsAppInput from "./wa-input";
 import { CartDetails } from "./cartDetails";
+import { KodeVoucherInput } from "./voucherInput";
 
 export function OrderStep({ data }: { data: CategoryWithSubCategories }) {
     const { setUserId, setZone, userId, zone } = useOrderStore();
@@ -54,7 +55,7 @@ export function OrderStep({ data }: { data: CategoryWithSubCategories }) {
                     <MethodSection />
                 </div>
                 <WhatsAppInput />
-                {/* <KodeVoucherInput /> */}
+                <KodeVoucherInput />
                 <CartDetails />
             </div>
         </ScrollContext.Provider>

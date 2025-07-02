@@ -20,14 +20,14 @@ function calculateTax(
     let taxAmount = 0;
 
     if (method.taxType === "PERCENTAGE") {
-        taxAmount = Math.round((price * method.taxAdmin) / 100);
+        taxAmount = Math.max((price * method.taxAdmin) / 100);
     } else {
         taxAmount = method.taxAdmin;
     }
 
     return {
         taxAmount,
-        finalPrice: price + taxAmount,
+        finalPrice: price,
     };
 }
 
@@ -53,14 +53,14 @@ function PricePreview({
                 : "bg-muted/50 border-border/50"
                 }`}
         >
-            <div className="flex items-center gap-1 mb-1">
+            {/* <div className="flex items-center gap-1 mb-1">
                 <Calculator className="h-3 w-3 text-muted-foreground" />
                 <span className="text-xs font-medium text-muted-foreground">
                     Biaya Admin
                 </span>
-            </div>
+            </div> */}
 
-            <div className="space-y-1 text-xs">
+            {/* <div className="space-y-1 text-xs">
                 <div className="flex justify-between">
                     <span>Harga Produk:</span>
                     <span>{FormatPrice(originalPrice)}</span>
@@ -75,11 +75,11 @@ function PricePreview({
                     </span>
                     <span>+{FormatPrice(taxAmount)}</span>
                 </div>
-                <div className="flex justify-between font-medium border-t pt-1 border-border/50">
-                    <span>Total:</span>
-                    <span className="text-primary">{FormatPrice(finalPrice)}</span>
-                </div>
-            </div>
+                </div> */}
+            <span className="text-primary">{FormatPrice(finalPrice)}</span>
+            {/* <div className="flex justify-between font-medium  border-border/50"> */}
+            {/* <span>Total:</span> */}
+            {/* </div> */}
         </div>
     );
 }

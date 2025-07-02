@@ -29,7 +29,6 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
         }
     }, [isLoading, isAuthenticated, user, requiredRole, router]);
 
-    // Early returns untuk kondisi yang tidak memenuhi
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">

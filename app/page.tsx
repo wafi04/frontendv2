@@ -3,6 +3,7 @@ import { BannerHomePage } from "./pages/home/banner";
 import { Navbar } from "@/components/custom/navbar";
 import { CategoriesAll } from "./pages/home/categories";
 import { PopularSection } from "./pages/home/popularCategories";
+import { Footer } from "@/components/layouts/footer";
 
 export default function Home() {
   return (
@@ -12,7 +13,9 @@ export default function Home() {
         <BannerHomePage />
         <PopularSection />
         <CategoriesAll />
+
       </main>
+      <Footer />
     </>
   );
 }

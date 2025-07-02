@@ -34,8 +34,7 @@ export default function LoginPage() {
     setLoginError(null);
 
     try {
-        const req = mutate(data)
-      window.location.href = "/";
+      mutate(data)
     } catch (error) {
       setLoginError("Terjadi Kesalahan ");
     } finally {

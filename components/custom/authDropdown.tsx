@@ -49,9 +49,10 @@ export function AuthDropdown({ user }: { user?: UserData }) {
             </DropdownMenuLabel>
 
             <DropdownMenuSeparator />
-            {user.role === 'Admin' ? (
+            {user.role === 'admin' ? (
                 <>
                     {pathname === '/dashboard' ? (
+
                         <DropdownMenuItem asChild>
                             <Link href="/" className="cursor-pointer">
                                 <Home className="mr-2 h-4 w-4" />
@@ -59,12 +60,21 @@ export function AuthDropdown({ user }: { user?: UserData }) {
                             </Link>
                         </DropdownMenuItem>
                     ) : (
+                        <>
+
                         <DropdownMenuItem asChild>
                             <Link href="/dashboard" className="cursor-pointer">
                                 <LayoutDashboard className="mr-2 h-4 w-4" />
                                 Dashboard
                             </Link>
                         </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                    <Link href="/profile" className="cursor-pointer">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Profil
+                    </Link>
+                </DropdownMenuItem>
+            </>
                     )}
                 </>
             ) : (
