@@ -54,8 +54,8 @@ function ProductCard({
     userRole: string | null;
     placeholder: string;
 }) {
-    const { setProduct, productDetails, setPrice, userId } = useOrderStore();
-    const { scrollToMethod } = useScrollToMethod(); // Use the scroll function
+    const { setProduct, productDetails, setPrice, userId,setFinalPrice } = useOrderStore();
+    const { scrollToMethod } = useScrollToMethod(); 
     const isSelected = product.providerId === productDetails.code;
 
     // Calculate original price and discount
@@ -91,6 +91,7 @@ function ProductCard({
             name: product.serviceName,
         });
         setPrice(product.currentPrice);
+        setFinalPrice(product.currentPrice)
 
         setTimeout(() => {
             scrollToMethod();

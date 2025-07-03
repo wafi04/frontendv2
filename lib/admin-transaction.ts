@@ -1,22 +1,12 @@
 import { Socket, io } from "socket.io-client";
-
-interface TransactionLogData {
-  orderId: string;
-  transactionType: string;
-  status: string;
-  userId?: string;
-  amount?: number;
-  timestamp: string;
-}
-
 export class AdminTransactionMonitor {
+  private socket: Socket | null = null;
   private serverUrl: string;
-  private socket: Socket | null;
   private adminId: string;
   private eventHandlers: Map<string, Function[]>;
-  private isAuthenticated: boolean;
+  private isAuthenticated: boolean = false;
 
-  constructor(serverUrl = 'http://localhost:3003', adminId: string) {
+  constructor(serverUrl = 'http://localhost:3005', adminId: string) {
     this.serverUrl = serverUrl;
     this.socket = null;
     this.adminId = adminId;
@@ -28,20 +18,38 @@ export class AdminTransactionMonitor {
   async connectAsAdmin(): Promise<string | undefined> {
     return new Promise((resolve, reject) => {
       try {
+        console.log('🔌 Connecting to server:', this.serverUrl);
+        
+        // Improved connection options
         this.socket = io(this.serverUrl, {
-          transports: ['websocket', 'polling'],
+          transports: ['polling', 'websocket'], 
           reconnection: true,
           reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+          timeout: 10000,
+          forceNew: true,
+          upgrade: true,
+          rememberUpgrade: false,
         });
 
+        this.setupAdminListeners();
+
         this.socket.on('connect', () => {
-          console.log('🔌 Admin connected to server');
-          this.authenticateAsAdmin();
+          console.log('🔌 Admin connected to server, Socket ID:', this.socket?.id);
+          
+          setTimeout(() => {
+            this.authenticateAsAdmin();
+          }, 100);
+          
           resolve(this.socket?.id);
         });
 
         this.socket.on('connect_error', (error) => {
           console.error('❌ Admin connection error:', error);
+          console.error('Error details:', {
+            message: error.message,
+            serverUrl: this.serverUrl
+          });
           reject(error);
         });
 
@@ -50,41 +58,52 @@ export class AdminTransactionMonitor {
           this.isAuthenticated = false;
         });
 
-        this.setupAdminListeners();
-
       } catch (error) {
+        console.error('❌ Failed to create socket connection:', error);
         reject(error);
       }
     });
   }
 
-  // ========== AUTHENTICATE ==========
   private authenticateAsAdmin() {
-    if (!this.socket) return;
+    if (!this.socket) {
+      console.error('❌ Socket not connected for authentication');
+      return;
+    }
 
+    console.log('🔐 Authenticating as admin:', this.adminId);
+    console.log('🔐 Socket connected:', this.socket.connected);
+    console.log('🔐 Socket ID:', this.socket.id);
+    
+    // ✅ Fix: Emit dengan adminId yang benar
     this.socket.emit('admin_authenticate', {
-      adminId: this.adminId
+      adminId: this.adminId 
     });
-
-    this.socket.on('admin_authenticated', (data) => {
-      console.log('✅ Admin authenticated:', data);
-      this.isAuthenticated = true;
-      this.triggerHandler('admin_authenticated', data);
-    });
-
-    this.socket.on('admin_authentication_error', (error) => {
-      console.error('❌ Admin authentication failed:', error);
-      this.isAuthenticated = false;
-      this.triggerHandler('admin_authentication_error', error);
-    });
+    
+    console.log('🔐 Authentication request sent');
   }
 
   // ========== SETUP LISTENERS ==========
   private setupAdminListeners() {
     if (!this.socket) return;
 
+    console.log('🎧 Setting up admin listeners...');
+
+    // ✅ Fix: Authentication responses
+    this.socket.on('admin_authenticated', (data) => {
+      console.log('✅ Admin authenticated SUCCESS:', data);
+      this.isAuthenticated = true;
+      this.triggerHandler('admin_authenticated', data);
+    });
+
+    this.socket.on('admin_authentication_error', (error) => {
+      console.error('❌ Admin authentication FAILED:', error);
+      this.isAuthenticated = false;
+      this.triggerHandler('admin_authentication_error', error);
+    });
+
     // New transaction logs (real-time)
-    this.socket.on('admin_new_transaction', (data: TransactionLogData) => {
+    this.socket.on('admin_new_transaction', (data: any) => {
       console.log('📝 New transaction:', data);
       this.triggerHandler('new_transaction', data);
     });
@@ -130,25 +149,94 @@ export class AdminTransactionMonitor {
       console.log('❌ Admin error:', data);
       this.triggerHandler('error', data);
     });
+
+    // Pong response
+    this.socket.on('pong', (data) => {
+      console.log('🏓 Pong received:', data);
+      this.triggerHandler('pong', data);
+    });
+
+    // ✅ Add: Connection status listeners
+    this.socket.on('connect', () => {
+      console.log('🔌 Socket connected');
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('🔌 Socket disconnected:', reason);
+      this.isAuthenticated = false;
+    });
+  }
+
+  // ========== CONNECTION TESTING ==========
+  async testConnection(): Promise<boolean> {
+    return new Promise((resolve) => {
+      if (!this.socket) {
+        console.log('❌ Socket not available for testing');
+        resolve(false);
+        return;
+      }
+
+      const timeout = setTimeout(() => {
+        console.log('❌ Connection test timeout');
+        resolve(false);
+      }, 5000);
+
+      this.socket.emit('ping');
+      
+      const pongHandler = () => {
+        clearTimeout(timeout);
+        console.log('✅ Connection test successful');
+        this.socket?.off('pong', pongHandler);
+        resolve(true);
+      };
+
+      this.socket.on('pong', pongHandler);
+    });
+  }
+
+  // ========== MANUAL AUTHENTICATION TEST ==========
+  testAuthentication() {
+    console.log('🧪 Testing authentication manually...');
+    console.log('🧪 Socket status:', {
+      connected: this.socket?.connected,
+      id: this.socket?.id,
+      authenticated: this.isAuthenticated
+    });
+    
+    if (this.socket?.connected) {
+      this.authenticateAsAdmin();
+    } else {
+      console.error('❌ Socket not connected for manual auth test');
+    }
   }
 
   // ========== ADMIN ACTIONS ==========
 
   // Get all transaction logs
   getLogs(filter = {}) {
-    if (!this.socket || !this.isAuthenticated) {
-      throw new Error('Admin not authenticated');
+    if (!this.socket) {
+      console.error('❌ Socket not connected');
+      return this;
+    }
+
+    if (!this.isAuthenticated) {
+      console.warn('⚠️ Admin not authenticated, attempting to get logs anyway');
     }
 
     this.socket.emit('admin_get_logs', filter);
-    console.log('📋 Requesting transaction logs');
+    console.log('📋 Requesting transaction logs with filter:', filter);
     return this;
   }
 
   // Get specific transaction details
   getTransactionDetails(orderId: string) {
-    if (!this.socket || !this.isAuthenticated) {
-      throw new Error('Admin not authenticated');
+    if (!this.socket) {
+      console.error('❌ Socket not connected');
+      return this;
+    }
+
+    if (!this.isAuthenticated) {
+      console.warn('⚠️ Admin not authenticated, attempting to get transaction details anyway');
     }
 
     this.socket.emit('admin_get_transaction_details', { orderId });
@@ -158,8 +246,13 @@ export class AdminTransactionMonitor {
 
   // Get stats
   getStats() {
-    if (!this.socket || !this.isAuthenticated) {
-      throw new Error('Admin not authenticated');
+    if (!this.socket) {
+      console.error('❌ Socket not connected');
+      return this;
+    }
+
+    if (!this.isAuthenticated) {
+      console.warn('⚠️ Admin not authenticated, attempting to get stats anyway');
     }
 
     this.socket.emit('admin_get_stats');
@@ -205,7 +298,8 @@ export class AdminTransactionMonitor {
       connected: this.socket?.connected || false,
       authenticated: this.isAuthenticated,
       adminId: this.adminId,
-      socketId: this.socket?.id
+      socketId: this.socket?.id,
+      serverUrl: this.serverUrl
     };
   }
 
@@ -225,6 +319,15 @@ export class AdminTransactionMonitor {
     if (this.socket) {
       this.socket.emit('ping');
       console.log('🏓 Ping sent');
+    }
+  }
+
+  // Force reconnection
+  reconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket.connect();
+      console.log('🔄 Reconnecting...');
     }
   }
 }
