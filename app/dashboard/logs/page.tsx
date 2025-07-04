@@ -1,239 +1,405 @@
-"use client"
-import React, { useState, useEffect, useCallback } from 'react';
-import { Activity, CreditCard, AlertTriangle, Monitor, Search } from 'lucide-react';
-import { AdminTransactionMonitor } from '@/lib/admin-transaction';
+"use client";
 
-interface TransactionLog {
-  orderId: string;
-  transactionType: string;
-  status: string;
-  userId?: string;
-  amount?: number;
-  timestamp: string;
-  error?: string;
-}
+import React, { useState, useMemo } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { 
+  Search, 
+  Download, 
+  Eye, 
+  DollarSign,
+  Users,
+  CheckCircle,
+  Clock,
+  XCircle,
+  AlertTriangle,
+  Filter,
+  X
+} from 'lucide-react';
+import { useGetLogs } from './server/server';
+import { HeaderDashboard } from '@/components/layouts/headerDashboard';
+import { formatDate, FormatPrice } from '@/utils/format';
 
-interface Stats {
-  todayTransactions: number;
-  successTransactions: number;
-  connectedAdmins: number;
-}
-const AdminDashboard = () => {
-  const [adminMonitor, setAdminMonitor] = useState<AdminTransactionMonitor | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [selectedTransaction, setSelectedTransaction] = useState<string>('');
-  const [transactionDetails, setTransactionDetails] = useState<any[]>([]);
+export default function Page() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [transactionTypeFilter, setTransactionTypeFilter] = useState('all');
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [amountMin, setAmountMin] = useState('');
+  const [amountMax, setAmountMax] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedLog, setSelectedLog] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
 
-  // Initialize admin monitor
-  useEffect(() => {
-    const monitor = new AdminTransactionMonitor('http://localhost:3005', 'admin-001');
-    setAdminMonitor(monitor);
-
-    // Setup event handlers SEBELUM connect
-    // ✅ Fix: Event name yang benar adalah 'admin_authenticated'
-    monitor.on('admin_authenticated', (data: any) => {
-      setIsAuthenticated(true);
-      console.log('✅ Admin authenticated:', data);
-
-      setTimeout(() => {
-        monitor.getLogs();
-        monitor.getStats();
-      }, 100);
-    });
-
-    monitor.on('admin_authentication_error', (error: any) => {
-      console.error('❌ Authentication failed:', error);
-      setIsAuthenticated(false);
-    });
-
-    // Real-time transaction updates
-    monitor.on('new_transaction', (log: TransactionLog) => {
-      console.log('📝 New transaction:', log);
-      setTransactionLogs(prev => [log, ...prev.slice(0, 49)]); // Keep last 50
-    });
-
-    // Payment updates
-    monitor.on('payment_update', (payment: any) => {
-      console.log('💳 Payment update:', payment);
-    });
-
-    // Error alerts
-    monitor.on('error_alert', (error: any) => {
-      console.error('❌ Error alert:', error);
-    });
-
-    // User activity
-    monitor.on('user_activity', (activity: any) => {
-      console.log('👤 User activity:', activity);
-    });
-
-    // Transaction logs response
-    monitor.on('transaction_logs', (data: any) => {
-      console.log('📋 Got transaction logs:', data);
-      setTransactionLogs(data.logs || []);
-    });
-
-    // Transaction details response
-    monitor.on('transaction_details', (data: any) => {
-      console.log('📄 Got transaction details:', data);
-      setTransactionDetails(data.logs || []);
-    });
-
-    // Stats response
-    monitor.on('stats', (data: Stats) => {
-      console.log('📊 Got stats:', data);
-      setStats(data);
-    });
-
-    // Error response
-    monitor.on('error', (error: any) => {
-      console.error('❌ Admin error:', error);
-    });
-
-    // Connect setelah semua event handler siap
-    monitor.connectAsAdmin()
-      .then(() => {
-        setIsConnected(true);
-        console.log('🔌 Admin connected successfully');
-      })
-      .catch(err => {
-        console.error('❌ Failed to connect:', err);
-        setIsConnected(false);
-      });
-
-    return () => {
-      monitor.disconnect();
+  // Build filters object
+  const filters = useMemo(() => {
+    const filterObj: any = {
+      page: currentPage,
+      limit: 50,
     };
-  }, []);
 
-  const handleGetTransactionDetails = useCallback((orderId: string) => {
-    if (adminMonitor && orderId) {
-      adminMonitor.getTransactionDetails(orderId);
-      setSelectedTransaction(orderId);
-    }
-  }, [adminMonitor]);
+    if (searchTerm) filterObj.search = searchTerm;
+    if (statusFilter !== 'all') filterObj.status = statusFilter;
+    if (transactionTypeFilter !== 'all') filterObj.transactionType = transactionTypeFilter;
+    if (paymentMethodFilter !== 'all') filterObj.paymentMethod = paymentMethodFilter;
+    if (dateFrom) filterObj.dateFrom = dateFrom;
+    if (dateTo) filterObj.dateTo = dateTo;
 
-  const handleRefreshLogs = useCallback(() => {
-    if (adminMonitor) {
-      adminMonitor.getLogs();
-    }
-  }, [adminMonitor]);
 
-  const handleRefreshStats = useCallback(() => {
-    if (adminMonitor) {
-      adminMonitor.getStats();
-    }
-  }, [adminMonitor]);
+    return filterObj;
+  }, [
+    searchTerm,
+    statusFilter,
+    transactionTypeFilter,
+    paymentMethodFilter,
+    dateFrom,
+    dateTo,
+    amountMin,
+    amountMax,
+    currentPage,
+  ]);
 
-  // Loading state
-  if (!isConnected) {
+  const logs = useGetLogs(filters);
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      SUCCESS: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
+      PENDING: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+      FAILED: { color: 'bg-red-100 text-red-800', icon: XCircle },
+      STARTED: { color: 'bg-blue-100 text-blue-800', icon: AlertTriangle },
+    };
+
+    const config = statusConfig[status] || { color: 'bg-gray-100 text-gray-800', icon: AlertTriangle };
+    const Icon = config.icon;
+
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p>Connecting to admin panel...</p>
-        </div>
+      <Badge className={`${config.color} border-0`}>
+        <Icon className="w-3 h-3 mr-1" />
+        {status}
+      </Badge>
+    );
+  };
+
+  const getTransactionTypeBadge = (type: string) => {
+    const typeConfig = {
+      PURCHASE: { color: 'bg-blue-100 text-blue-800' },
+      REFUND: { color: 'bg-orange-100 text-orange-800' },
+      TOPUP: { color: 'bg-green-100 text-green-800' },
+      WITHDRAWAL: { color: 'bg-red-100 text-red-800' },
+    };
+
+    const config = typeConfig[type] || { color: 'bg-gray-100 text-gray-800' };
+
+    return (
+      <Badge className={`${config.color} border-0`}>
+        {type}
+      </Badge>
+    );
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setTransactionTypeFilter('all');
+    setPaymentMethodFilter('all');
+    setDateFrom('');
+    setDateTo('');
+    setAmountMin('');
+    setAmountMax('');
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = searchTerm || statusFilter !== 'all' || transactionTypeFilter !== 'all' || 
+                          paymentMethodFilter !== 'all' || dateFrom || dateTo || amountMin || amountMax;
+
+  if (logs.isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
       </div>
     );
   }
 
-  // Authentication state
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <p>Authenticating admin...</p>
-          <p className="text-sm text-gray-400 mt-2">
-            Connected: {isConnected ? '✅' : '❌'} | 
-            Authenticated: {isAuthenticated ? '✅' : '❌'}
-          </p>
-          
-        
-          {/* Debug Info */}
-          <div className="mt-4 text-xs text-gray-500">
-            <p>Socket Status: {adminMonitor?.getStatus().connected ? 'Connected' : 'Disconnected'}</p>
-            <p>Socket ID: {adminMonitor?.getStatus().socketId || 'None'}</p>
-            <p>Admin ID: {adminMonitor?.getStatus().adminId || 'None'}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Rest of your component JSX goes here...
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-8">Admin Dashboard</h1>
-        
-        {/* Status indicator */}
-        <div className="mb-4 p-4 bg-gray-800 rounded-lg">
-          <div className="flex items-center space-x-4">
-            <span className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></span>
-            <span>Connected: {isConnected ? '✅' : '❌'}</span>
-            <span>Authenticated: {isAuthenticated ? '✅' : '❌'}</span>
-          </div>
-        </div>
+    <div className="space-y-6">
+      <HeaderDashboard title="Logs Transaction" desc="Manage Logs Transactions" />
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Transaction Logs</CardTitle>
+          <CardDescription>Search and filter transaction logs</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Search and Basic Filters */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by Order ID, User ID, Position, or Product..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="SUCCESS">Success</SelectItem>
+                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="FAILED">Failed</SelectItem>
+                <SelectItem value="STARTED">Started</SelectItem>
+              </SelectContent>
+            </Select>
 
-        {/* Your dashboard content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Stats */}
-          {stats && (
-            <div className="bg-gray-800 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold mb-4">Statistics</h2>
-              <div className="space-y-2">
-                <p>Today's Transactions: {stats.todayTransactions || 0}</p>
-                <p>Success Transactions: {stats.successTransactions || 0}</p>
-                <p>Connected Admins: {stats.connectedAdmins || 0}</p>
+
+                  <div>
+                    <Input
+                      type="date"
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <Input
+                      type="date"
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                    />
+                  </div>
+
+                  
+
+           
+
+            {hasActiveFilters && (
+              <Button variant="outline" onClick={clearFilters} className="w-full sm:w-auto">
+                <X className="w-4 h-4 mr-2" />
+                Clear
+              </Button>
+            )}
+          </div>
+
+         
+
+          {/* Active Filters Display */}
+          {hasActiveFilters && (
+            <div className="mb-4 p-3 bg-muted rounded-lg">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-medium">Active Filters:</span>
+                {searchTerm && (
+                  <Badge variant="secondary">Search: {searchTerm}</Badge>
+                )}
+                {statusFilter !== 'all' && (
+                  <Badge variant="secondary">Status: {statusFilter}</Badge>
+                )}
+                {transactionTypeFilter !== 'all' && (
+                  <Badge variant="secondary">Type: {transactionTypeFilter}</Badge>
+                )}
+                {paymentMethodFilter !== 'all' && (
+                  <Badge variant="secondary">Payment: {paymentMethodFilter}</Badge>
+                )}
+                {dateFrom && (
+                  <Badge variant="secondary">From: {dateFrom}</Badge>
+                )}
+                {dateTo && (
+                  <Badge variant="secondary">To: {dateTo}</Badge>
+                )}
+                {amountMin && (
+                  <Badge variant="secondary">Min: {FormatPrice(parseFloat(amountMin))}</Badge>
+                )}
+                {amountMax && (
+                  <Badge variant="secondary">Max: {FormatPrice(parseFloat(amountMax))}</Badge>
+                )}
               </div>
             </div>
           )}
 
-          {/* Transaction Logs */}
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {transactionLogs.map((log, index) => (
-                <div key={index} className="p-3 bg-gray-700 rounded">
-                  <div className="flex justify-between items-center">
-                    <span className="font-mono text-sm">{log.orderId}</span>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      log.status === 'SUCCESS' ? 'bg-green-600' : 'bg-red-600'
-                    }`}>
-                      {log.status}
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    {new Date(log.timestamp).toLocaleString()}
+          {/* Results Summary */}
+          {logs.pagination && (
+            <div className="mb-4 text-sm text-muted-foreground">
+              Showing {logs.data?.length || 0} of {logs.pagination.total} results
+              {logs.pagination.totalPages > 1 && (
+                <span> (Page {logs.pagination.currentPage} of {logs.pagination.totalPages})</span>
+              )}
+            </div>
+          )}
+
+          {/* Logs Table */}
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[120px]">Order ID</TableHead>
+                  <TableHead className="w-[100px]">User ID</TableHead>
+                  <TableHead className="w-[120px]">Product</TableHead>
+                  <TableHead className="w-[100px]">Amount</TableHead>
+                  <TableHead className="w-[80px]">Status</TableHead>
+                  <TableHead className="w-[80px]">Type</TableHead>
+                  <TableHead className="w-[140px]">Time</TableHead>
+                  <TableHead className="w-[80px]">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {logs.data && logs.data.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      No logs found matching your search criteria.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  logs.data?.map((log) => (
+                    <TableRow key={log._id} className="hover:bg-muted/50">
+                      <TableCell className="font-medium">
+                        <div className="truncate max-w-[120px]" title={log.orderId}>
+                          {log.orderId}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="truncate max-w-[100px]" title={log.userId}>
+                          {log.userId}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="truncate max-w-[120px]" title={log.data.productName || '-'}>
+                          {log.data.productName || '-'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium text-green-600">
+                          {log.data.finalAmount ? FormatPrice(log.data.finalAmount) : '-'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(log.status)}
+                      </TableCell>
+                      <TableCell>
+                        {getTransactionTypeBadge(log.transactionType)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm" title={formatDate(log.timestamp)}>
+                          {formatDate(log.timestamp)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedLog(log)}
+                        >
+                          <Eye className="w-3 h-3" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Pagination */}
+          {logs.pagination && logs.pagination.totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {currentPage} of {logs.pagination.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === logs.pagination.totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Detail Modal */}
+      {selectedLog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Log Details</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedLog(null)}
+                >
+                  ×
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Order ID</label>
+                  <p className="font-medium">{selectedLog.orderId}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">User ID</label>
+                  <p className="font-medium">{selectedLog.userId}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Type</label>
+                  <div className="mt-1">
+                    {getTransactionTypeBadge(selectedLog.transactionType)}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Status</label>
+                  <div className="mt-1">
+                    {getStatusBadge(selectedLog.status)}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Timestamp</label>
+                  <p className="font-medium">{formatDate(selectedLog.timestamp)}</p>
+                </div>
+                {selectedLog.data.paymentMethod && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Payment Method</label>
+                    <p className="font-medium">{selectedLog.data.paymentMethod}</p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="border-t pt-4">
+                <h4 className="font-medium mb-3">Data Details</h4>
+                <div className="bg-muted p-4 rounded-lg">
+                  <pre className="text-sm whitespace-pre-wrap break-all">
+                    {JSON.stringify(selectedLog.data, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-
-        {/* Action buttons */}
-        <div className="mt-8 flex space-x-4">
-          <button
-            onClick={handleRefreshLogs}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors"
-          >
-            Refresh Logs
-          </button>
-          <button
-            onClick={handleRefreshStats}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded transition-colors"
-          >
-            Refresh Stats
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
-};
-
-export default AdminDashboard
+}
