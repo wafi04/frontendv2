@@ -47,6 +47,10 @@ export const dataNavAdmin: NavItem[] = [
         nama: "Member Deposit",
         path: "/dashboard/user-deposit",
       },
+       {
+        nama: "Analytics User",
+        path: "/dashboard/member/analytics",
+      },
       {
         nama: "Kelola Member",
         path: "/dashboard/member",
