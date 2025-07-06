@@ -1,5 +1,4 @@
 import { api } from "@/lib/axios";
-import { CategoryReseponseWithPagination } from "@/types/category";
 import { API_RESPONSE } from "@/types/response";
 import { FilterSubCategories, SubCategory, SubCategoryReseponseWithPagination } from "@/types/subCategory";
 import { FormValuesSubCategory } from "@/validation/category";

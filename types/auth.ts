@@ -1,4 +1,5 @@
 import z from 'zod';
+import { PaginationMeta } from './category';
 export const passwordSchema = z
   .string()
   .min(5, { message: 'Password must be at least 5 characters long.' });
@@ -44,7 +45,27 @@ export interface UserResponse {
   username: string;
   whatsapp?: string | null
   createdAt: Date;
+  isOnline : boolean
   balance?: number;
+  lastActiveAt : string
   role: string;
   apiKey?: string | null;
 }
+
+export interface SessionData {
+  deviceInfo : string
+  expires : string
+  id : string
+  ip : string
+  userAgent : string
+}
+
+
+export interface UserWithSession extends UserResponse {
+  session : SessionData[]
+}
+
+export interface PaginationUserResponse  {
+  data  : UserWithSession[]
+  meta : PaginationMeta
+} 
