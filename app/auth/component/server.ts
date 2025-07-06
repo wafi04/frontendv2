@@ -15,13 +15,12 @@ export function useHandleLogout() {
     mutationKey: ["logout"],
     mutationFn: async () => {
       const token = localStorage.getItem("token");
-      const response = await api.post(`/auth/logout?token=${token}`);
+      const response = await api.post(`/auth/logout`);
       return response.data;
     },
     onSuccess: () => {
       queryClient.clear();
       push.push("/auth/login");
-      localStorage.removeItem("token");
       toast.success("Logout Succes");
     },
     onError: (error: Error) => {
@@ -41,7 +40,7 @@ export const useRegisterMutation = () => {
     },
     onError: (err: ErrorResponse) => {
       queryClient.cancelQueries({ queryKey: ["user"] });
-      toast.error(err.message);
+      toast.error(err.response?.data?.message ?? "Sudah terdaftar");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -67,10 +66,10 @@ export const useLoginMutation = () => {
     },
     onError: (error: ErrorResponse) => {
       const errorMessage =
-        error.response?.data?.message || error.message || "Login failed";
+        error.response?.data?.message || "Login failed";
 
       queryClient.cancelQueries({ queryKey: ["user"] });
-      toast.error(`Error: ${errorMessage}`);
+      toast.error(`${errorMessage}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });

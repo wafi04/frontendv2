@@ -1,3 +1,5 @@
+import { PaginationMeta } from "./category"
+
 export type DepositData =  {
     amount: number
     createdAt: string
@@ -9,4 +11,10 @@ export type DepositData =  {
     status: string
     updatedAt: string
     username: string
+}
+
+
+export type DepositWithPagination = {
+    data: DepositData[]
+    meta : PaginationMeta
 }

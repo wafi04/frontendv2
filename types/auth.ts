@@ -44,7 +44,7 @@ export interface UserResponse {
   name: string;
   username: string;
   whatsapp?: string | null
-  createdAt: Date;
+  createdAt: string
   isOnline : boolean
   balance?: number;
   lastActiveAt : string

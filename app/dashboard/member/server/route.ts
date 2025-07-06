@@ -2,8 +2,9 @@ import { useDebounce } from "@/hooks/useDebounced";
 import { api } from "@/lib/axios";
 import { PaginationUserResponse } from "@/types/auth";
 import { API_RESPONSE, PaginationParams } from "@/types/response";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { toast } from "sonner";
 
 interface AnalyticsUser extends PaginationParams {
     sortBy?: 'last_active' | 'created' | 'sessions' | 'balance';
@@ -76,10 +77,10 @@ export  function useGetAnalyticsUser(filters?: AnalyticsUser) {
 export function useGetAllMemberWithSession(
     {filters} : {filters : {limit : string, page : string, search : string}}
 ){
-    // Debounce search term untuk mengurangi API calls
-    const debouncedSearch = useDebounce(filters.search, 500) // 500ms delay
+
+    const debouncedSearch = useDebounce(filters.search, 500) 
     
-    // Buat filters yang sudah di-debounce
+
     const debouncedFilters = useMemo(() => ({
         ...filters,
         search: debouncedSearch
@@ -110,4 +111,23 @@ export function useGetAllMemberWithSession(
         // Return info apakah sedang debouncing
         isDebouncing: filters.search !== debouncedSearch
     }
+}
+
+
+export function useUpdateUser() {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn : async (data : {name : string, username : string, balance : number, role : string}) => {
+            const req = await api.patch(`/auth/update/profile`,data)
+            return req.data
+        },
+        onSuccess : () => {
+            queryClient.invalidateQueries({ queryKey: ["users-all"] })
+            queryClient.invalidateQueries({ queryKey: ["user"] })
+            toast.success('User updated successfully')
+        },        
+        onError: (err) => {
+            toast.error("failed to update user")
+        }
+    })
 }

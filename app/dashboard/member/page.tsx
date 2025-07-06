@@ -16,24 +16,13 @@ import { formatDate, FormatPrice } from "@/utils/format"
 import { TableSkeleton } from "@/components/custom/tableSkeleton"
 import { useState } from "react"
 import { DialogUpdateUser } from "./_components/dialog"
-import { UserResponse } from "@/types/auth"
-
-// Interface untuk member data
-interface MemberData {
-  id: string
-  username: string
-  name?: string
-  balance: number
-  role: string
-  isOnline: boolean
-  session: any[]
-  lastActiveAt?: string
-}
+import { UserResponse, UserWithSession } from "@/types/auth"
+import { MemberDetailSheet } from "./_components/memberDetails"
 
 export default function Page() {
   const { search, currentPage, limit, setSearch, setCurrentPage, setLimit, resetFilter } = useFilter("member")
 
-  const { data, isLoading, error, isDebouncing } = useGetAllMemberWithSession({
+  const { data, isLoading, isDebouncing } = useGetAllMemberWithSession({
     filters: {
       limit,
       page: currentPage.toString(),
@@ -48,11 +37,21 @@ export default function Page() {
     initialData?: {
       username: string
       balance: number
+      name: string
       role: string
     }
   }>({
     isOpen: false,
     mode: 'create'
+  })
+
+  // State untuk member detail sheet
+  const [memberDetailState, setMemberDetailState] = useState<{
+    isOpen: boolean
+    selectedMember: UserWithSession | null
+  }>({
+    isOpen: false,
+    selectedMember: null
   })
 
   const handleSearch = (value: string) => {
@@ -64,20 +63,13 @@ export default function Page() {
     return sessions.filter((session) => new Date(session.expires) > now).length
   }
 
-  // Handler untuk membuka dialog create
-  const handleOpenCreate = () => {
-    setDialogState({
-      isOpen: true,
-      mode: 'create'
-    })
-  }
-
   // Handler untuk membuka dialog update
   const handleOpenUpdate = (member: UserResponse) => {
     setDialogState({
       isOpen: true,
       mode: 'update',
       initialData: {
+        name: member.name,
         username: member.username,
         balance: member.balance ?? 0,
         role: member.role
@@ -85,7 +77,21 @@ export default function Page() {
     })
   }
 
+  // Handler untuk membuka member detail
+  const handleOpenMemberDetail = (member: UserWithSession) => {
+    setMemberDetailState({
+      isOpen: true,
+      selectedMember: member
+    })
+  }
 
+  // Handler untuk menutup member detail
+  const handleCloseMemberDetail = () => {
+    setMemberDetailState({
+      isOpen: false,
+      selectedMember: null
+    })
+  }
 
   if (isLoading && !data) {
     return (
@@ -97,29 +103,16 @@ export default function Page() {
             </div>
           </div>
         </HeaderDashboard>
-        <TableSkeleton limit={10} colSpan={7}/>
+        <Card>
+          <CardContent>
+            <TableSkeleton limit={10} colSpan={7} />
+          </CardContent>
+        </Card>
       </>
     )
   }
 
-  if (error) {
-    return (
-      <>
-        <HeaderDashboard title="Manage Member" desc="Manage All Member" />
-        <div className="mx-5">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              <div className="space-y-1">
-                <p className="font-semibold">Error loading data</p>
-                <p className="text-sm">{error.message}</p>
-              </div>
-            </AlertDescription>
-          </Alert>
-        </div>
-      </>
-    )
-  }
+
 
   return (
     <>
@@ -150,11 +143,6 @@ export default function Page() {
                 </Button>
               )}
             </div>
-            {/* Tombol Create Member */}
-            <Button onClick={handleOpenCreate} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Add Member
-            </Button>
           </div>
         </HeaderDashboard>
 
@@ -165,7 +153,7 @@ export default function Page() {
               <Loader2 className="h-6 w-6 animate-spin" />
             </div>
           )}
-          
+
           {data?.data?.data.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
@@ -177,7 +165,7 @@ export default function Page() {
             </Card>
           ) : (
             <Card>
-              <CardContent className="p-0">
+              <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -201,24 +189,24 @@ export default function Page() {
                           </div>
                         </TableCell>
                         <TableCell>
-                            <Badge
-                              variant={member.isOnline ? "default" : "secondary"}
-                              className={member.isOnline ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}
-                            >
-                              {member.isOnline ? "Online" : "Offline"}
-                            </Badge>
-                            <Badge
-                              variant={member.role === "admin" ? "default" : "outline"}
-                              className={
-                                member.role === "admin" ? "bg-purple-100 text-purple-800 hover:bg-purple-100" : ""
-                              }
-                            >
-                              {member.role}
-                            </Badge>
+                          <Badge
+                            variant={member.isOnline ? "default" : "secondary"}
+                            className={member.isOnline ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}
+                          >
+                            {member.isOnline ? "Online" : "Offline"}
+                          </Badge>
+                          <Badge
+                            variant={member.role === "admin" ? "default" : "outline"}
+                            className={
+                              member.role === "admin" ? "bg-purple-100 text-purple-800 hover:bg-purple-100" : ""
+                            }
+                          >
+                            {member.role}
+                          </Badge>
                         </TableCell>
                         <TableCell className="flex items-center gap-2">
-                            <span className="font-medium">{getActiveSessionsCount(member.session)}</span>
-                            <span className="text-muted-foreground">/ {member.session?.length || 0}</span>
+                          <span className="font-medium">{getActiveSessionsCount(member.session)}</span>
+                          <span className="text-muted-foreground">/ {member.session?.length || 0}</span>
                         </TableCell>
                         <TableCell>
                           <span className="font-medium">{FormatPrice(member.balance ?? 0)}</span>
@@ -227,18 +215,24 @@ export default function Page() {
                           {member.lastActiveAt ? formatDate(member.lastActiveAt) : "Never"}
                         </TableCell>
                         <TableCell className="text-right flex justify-end gap-2">
-                       
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleOpenUpdate(member)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                    
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenMemberDetail(member)}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenUpdate(member)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -250,17 +244,15 @@ export default function Page() {
         </div>
 
         {data?.data?.meta && (
-          <div className="mx-5">
-            <Pagination
-              currentPage={data.data.meta.currentPage}
-              totalPages={data.data.meta.totalPages}
-              hasNextPage={data.data.meta.hasNextPage}
-              hasPrevPage={data.data.meta.hasPrevPage}
-              totalItems={data.data.meta.totalItems}
-              itemsPerPage={data.data.meta.itemsPerPage}
-              onPageChange={setCurrentPage}
-            />
-          </div>
+          <Pagination
+            currentPage={data.data.meta.currentPage}
+            totalPages={data.data.meta.totalPages}
+            hasNextPage={data.data.meta.hasNextPage}
+            hasPrevPage={data.data.meta.hasPrevPage}
+            totalItems={data.data.meta.totalItems}
+            itemsPerPage={data.data.meta.itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
 
@@ -269,6 +261,13 @@ export default function Page() {
         open={dialogState.isOpen}
         setOpen={(open) => setDialogState(prev => ({ ...prev, isOpen: open }))}
         initialData={dialogState.initialData}
+      />
+
+      {/* Member Detail Sheet */}
+      <MemberDetailSheet
+        member={memberDetailState.selectedMember}
+        open={memberDetailState.isOpen}
+        onOpenChange={handleCloseMemberDetail}
       />
     </>
   )

@@ -4,6 +4,7 @@ import { FormUpdateUser } from "./formUpdateUser";
 interface DialogUpdateUserProps {
     initialData?: {
         balance: number;
+        name: string
         username: string;
         role: string;
     };
@@ -20,13 +21,13 @@ export function DialogUpdateUser({ initialData, open, setOpen }: DialogUpdateUse
                         {initialData ? "Update User" : "Create User"}
                     </DialogTitle>
                     <DialogDescription>
-                        {initialData 
-                            ? "Update informasi pengguna yang sudah ada" 
+                        {initialData
+                            ? "Update informasi pengguna yang sudah ada"
                             : "Tambahkan pengguna baru ke sistem"
                         }
                     </DialogDescription>
                 </DialogHeader>
-                <FormUpdateUser 
+                <FormUpdateUser
                     initialData={initialData}
                 />
             </DialogContent>
