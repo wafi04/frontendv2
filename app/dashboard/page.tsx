@@ -22,9 +22,20 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { AnalyticsTransactions } from "./analytics"
+import { UserProfile } from "@/components/custom/userProfile"
+import { useGetMostProductSell } from "./analytics/server/transactions"
+import { FormatPrice } from "@/utils/format"
+import { MostProductCellComponent } from "./analytics/mostProductCell"
 
 export default function Page() {
   const [selectedTab, setSelectedTab] = useState("overview")
+  const {
+    data: mostProductSell,
+    isLoading: isLoadingMostProductSell,
+    error: errorMostProductSell
+  } = useGetMostProductSell({ filter: { startDate: "2025-01-01", endDate: "2025-12-31" } })
+
+  console.log(mostProductSell)
 
   const moneySources = [
     {
@@ -57,7 +68,6 @@ export default function Page() {
       name: "Ahmad Rizki",
       email: "ahmad@example.com",
       balance: 850000,
-      avatar: "/placeholder.svg?height=40&width=40",
       status: "online",
       tier: "premium",
       lastActivity: "2 menit yang lalu",
@@ -67,7 +77,6 @@ export default function Page() {
       name: "Siti Nurhaliza",
       email: "siti@example.com",
       balance: 1200000,
-      avatar: "/placeholder.svg?height=40&width=40",
       status: "online",
       tier: "gold",
       lastActivity: "5 menit yang lalu",
@@ -77,7 +86,6 @@ export default function Page() {
       name: "Budi Santoso",
       email: "budi@example.com",
       balance: 650000,
-      avatar: "/placeholder.svg?height=40&width=40",
       status: "online",
       tier: "silver",
       lastActivity: "1 menit yang lalu",
@@ -87,20 +95,12 @@ export default function Page() {
       name: "Maya Sari",
       email: "maya@example.com",
       balance: 2100000,
-      avatar: "/placeholder.svg?height=40&width=40",
       status: "online",
       tier: "premium",
       lastActivity: "3 menit yang lalu",
     },
   ]
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount)
-  }
 
   const totalBalance = moneySources.reduce((sum, source) => sum + source.balance, 0)
   const totalUserBalance = activeUsers.reduce((sum, user) => sum + user.balance, 0)
@@ -136,63 +136,11 @@ export default function Page() {
         <TabsList className="rounded-lg">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           {/* Stats Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, staggerChildren: 0.2 }}
-            className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
-          >
-            <Card className="border-primary hover:border-primary/80 transition-colors">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-primary">Total Transactions</CardTitle>
-                <ShoppingCart className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-primary">{100}</div>
-                <p className="text-xs text-muted-foreground">Lifetime transactions</p>
-              </CardContent>
-            </Card>
 
-            <Card className="border-primary hover:border-primary/80 transition-colors">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-primary">Total Revenue Bulan Ini</CardTitle>
-                <DollarSign className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-primary">100</div>
-                <p className="text-xs text-muted-foreground">Hari ini: 100</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-primary hover:border-primary/80 transition-colors">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-primary">Total Profit Bulan Ini</CardTitle>
-                <CreditCard className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-primary">100</div>
-                <p className="text-xs text-muted-foreground">Hari ini: 1000</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-primary hover:border-primary/80 transition-colors">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-primary">Success Rate</CardTitle>
-                <Users className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-primary">
-                  {Number.parseInt("1000") ? Math.round((10 / 100) * 100) : 0}%
-                </div>
-                <p className="text-xs text-muted-foreground">{100} successful transactions</p>
-              </CardContent>
-            </Card>
-          </motion.div>
 
           {/* Money Sources Section */}
           <motion.div
@@ -205,7 +153,7 @@ export default function Page() {
               <h2 className="text-2xl font-bold text-primary">My Money Sources</h2>
               <Badge variant="secondary" className="text-sm">
                 <TrendingUp className="w-3 h-3 mr-1" />
-                Total: {formatCurrency(totalBalance)}
+                Total: {FormatPrice(totalBalance)}
               </Badge>
             </div>
 
@@ -232,7 +180,7 @@ export default function Page() {
                         </Badge>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold text-primary">{formatCurrency(source.balance)}</div>
+                        <div className="text-2xl font-bold text-primary">{FormatPrice(source.balance)}</div>
                         <p className="text-xs text-muted-foreground mt-1">Available balance</p>
                         <div className="mt-3 w-full bg-secondary rounded-full h-2">
                           <div
@@ -266,7 +214,7 @@ export default function Page() {
                 </Badge>
                 <Badge variant="secondary" className="text-sm">
                   <Wallet className="w-3 h-3 mr-1" />
-                  Total Balance: {formatCurrency(totalUserBalance)}
+                  Total Balance: {FormatPrice(totalUserBalance)}
                 </Badge>
               </div>
             </div>
@@ -290,7 +238,7 @@ export default function Page() {
                   <Wallet className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-blue-600">{formatCurrency(totalUserBalance)}</div>
+                  <div className="text-2xl font-bold text-blue-600">{FormatPrice(totalUserBalance)}</div>
                   <p className="text-xs text-muted-foreground">Combined balance</p>
                 </CardContent>
               </Card>
@@ -315,7 +263,7 @@ export default function Page() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-orange-600">
-                    {formatCurrency(totalUserBalance / totalActiveUsers)}
+                    {FormatPrice(totalUserBalance / totalActiveUsers)}
                   </div>
                   <p className="text-xs text-muted-foreground">Per user</p>
                 </CardContent>
@@ -333,15 +281,7 @@ export default function Page() {
                 >
                   <Card className="border-primary hover:border-primary/80 transition-all duration-300 hover:shadow-lg">
                     <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-                      <Avatar className="h-10 w-10 mr-3">
-                        <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                        <AvatarFallback>
-                          {user.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
+                      <UserProfile username={user.name} />
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <CardTitle className="text-sm font-medium text-primary">{user.name}</CardTitle>
@@ -355,7 +295,7 @@ export default function Page() {
                     <CardContent>
                       <div className="flex justify-between items-center">
                         <div>
-                          <div className="text-lg font-bold text-primary">{formatCurrency(user.balance)}</div>
+                          <div className="text-lg font-bold text-primary">{FormatPrice(user.balance)}</div>
                           <p className="text-xs text-muted-foreground">{user.lastActivity}</p>
                         </div>
                         <div className="text-right">
@@ -370,6 +310,11 @@ export default function Page() {
               ))}
             </div>
           </motion.div>
+          {
+            mostProductSell && (
+              <MostProductCellComponent productData={mostProductSell.data} />
+            )
+          }
         </TabsContent>
 
         {/* Analytics Tab */}
@@ -377,22 +322,7 @@ export default function Page() {
           <AnalyticsTransactions />
         </TabsContent>
 
-        {/* Reports Tab */}
-        <TabsContent value="reports" className="space-y-4">
-          <Card className="border-primary hover:border-primary/80 transition-colors">
-            <CardHeader>
-              <CardTitle className="text-primary">Transaction Reports</CardTitle>
-              <CardDescription className="text-muted-foreground">
-                Generate and download detailed reports
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px] flex items-center justify-center border rounded-lg bg-secondary">
-                <p className="text-muted-foreground">Report generation options will appear here</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+
       </Tabs>
     </main>
   )

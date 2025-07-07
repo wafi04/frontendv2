@@ -33,3 +33,43 @@ export interface RecentTransactionsPagination {
 }
 
 
+export type TransactionType = "MEMBERSHIP" | "DEPOSIT" | "TOPUP";
+export type TransactionStatus = "FAILED" | "PENDING" | "PROCESS" | "SUCCESS";
+
+export interface DailyStat {
+  date: string; 
+  count: number;
+  amount: number;
+  profit: number;
+}
+
+export interface TransactionAnalytics {
+  totalTransactions: number;
+  totalAmount: number;
+  totalProfit: number;
+  averageAmount: number;
+  transactionsByType: Record<TransactionType, number>;
+  transactionsByStatus: Record<TransactionStatus, number>;
+  dailyStats: DailyStat[];
+}
+
+
+export interface MostProductCell {
+  average_amount: number
+  product_name: string
+  total_amount: number
+  total_profit: number
+  transaction_count: number
+  unique_users:number
+}
+
+export interface ApiMostResponse {
+  success : boolean
+  data: MostProductCell[]
+  meta: {
+    endDate: string
+    filters: {}
+    limit: number
+    startDate: string
+  }
+}

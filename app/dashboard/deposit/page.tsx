@@ -1,5 +1,4 @@
 "use client"
-
 import { HeaderDashboard } from "@/components/layouts/headerDashboard"
 import { useGetAllDepositUser } from "./server/server"
 import { useFilter } from "@/hooks/usefilter"
@@ -7,23 +6,15 @@ import { useState } from "react"
 import { Pagination } from "@/components/custom/pagination"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
     Search,
     X,
-    Eye,
-    AlertCircle,
     Loader2,
     Filter,
-    CheckCircle2,
-    Clock,
-    XCircle,
-    Trash2,
     CreditCard,
     User,
     Calendar,
@@ -33,11 +24,13 @@ import {
 import { formatDate, FormatPrice } from "@/utils/format"
 import { TableSkeleton } from "@/components/custom/tableSkeleton"
 import { DepositData } from "@/types/deposit"
+import { getStatusBadge } from "@/components/custom/statusBadge"
+import { DepositDetail } from "./dialogDeposit"
 
 export default function Page() {
     const { search, currentPage, limit, setSearch, setCurrentPage, setLimit, resetFilter } = useFilter("depositmember")
     const [status, setStatus] = useState<string>("SUCCESS") // SUCCESS,PENDING,FAILED,DELETED
-    const { data, isLoading, error, isDebouncing } = useGetAllDepositUser({
+    const { data, isLoading, isDebouncing } = useGetAllDepositUser({
         filters: {
             limit,
             page: currentPage.toString(),
@@ -55,54 +48,7 @@ export default function Page() {
 
     const handleStatusChange = (value: string) => {
         setStatus(value)
-        setCurrentPage(1) // Reset to first page when filter changes
-    }
-
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "SUCCESS":
-                return (
-                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Success
-                    </Badge>
-                )
-            case "PENDING":
-                return (
-                    <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Pending
-                    </Badge>
-                )
-            case "FAILED":
-                return (
-                    <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Failed
-                    </Badge>
-                )
-            case "DELETED":
-                return (
-                    <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Deleted
-                    </Badge>
-                )
-            default:
-                return (
-                    <Badge variant="outline">
-                        {status}
-                    </Badge>
-                )
-        }
-    }
-
-    const getMethodIcon = (method: string) => {
-        const methodLower = method.toLowerCase()
-        if (methodLower.includes('bank') || methodLower.includes('transfer')) {
-            return <CreditCard className="h-4 w-4" />
-        }
-        return <DollarSign className="h-4 w-4" />
+        setCurrentPage(1)
     }
 
     if (isLoading && !data) {
@@ -116,26 +62,11 @@ export default function Page() {
                         <Skeleton className="h-10 w-32" />
                     </div>
                 </HeaderDashboard>
-                <TableSkeleton limit={10} colSpan={8} />
-            </>
-        )
-    }
-
-    if (error) {
-        return (
-            <>
-                <HeaderDashboard title="All Member Deposit" desc="Manage All Member deposit" />
-                <div className="mx-5">
-                    <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>
-                            <div className="space-y-1">
-                                <p className="font-semibold">Error loading deposit data</p>
-                                <p className="text-sm">{error.message}</p>
-                            </div>
-                        </AlertDescription>
-                    </Alert>
-                </div>
+                <Card>
+                    <CardContent>
+                        <TableSkeleton limit={10} colSpan={8} />
+                    </CardContent>
+                </Card>
             </>
         )
     }
@@ -271,8 +202,7 @@ export default function Page() {
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-2">
-                                                        {getMethodIcon(deposit.method)}
-                                                        <span className="text-sm">{deposit.method}</span>
+                                                        {(deposit.method)}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
@@ -295,13 +225,7 @@ export default function Page() {
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     <div className="flex justify-end gap-2">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-blue-600 hover:text-blue-700"
-                                                        >
-                                                            <Eye className="h-4 w-4" />
-                                                        </Button>
+                                                        <DepositDetail deposit={deposit} />
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
