@@ -1,7 +1,7 @@
 import { useDebounce } from "@/hooks/useDebounced"
 import { api } from "@/lib/axios"
 import { API_RESPONSE } from "@/types/response"
-import { ApiMostResponse, TransactionAnalytics } from "@/types/transactions"
+import { ApiMostaUserActiveResponse, ApiMostResponse, TransactionAnalytics } from "@/types/transactions"
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 
@@ -56,6 +56,27 @@ export function useGetMostProductSell({ filter }: { filter: FilterType }) {
                 if (filter.endDate) params.append('endDate', filter.endDate)
                 if (filter.status) params.append('status', filter.status)
             const data = await api.get<ApiMostResponse>(`/transactions/analytics/top-products?${params.toString()}`)
+            return data.data
+        },
+    })
+    return {
+        data,
+        isLoading,
+        error
+    }
+}
+
+
+export function useGetMostUserActive({ filter }: { filter: FilterType }) {
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['most-product-sell',filter],
+        queryFn: async () => {
+             const params = new URLSearchParams()
+                if (filter.startDate) params.append('startDate', filter.startDate)
+                if (filter.type) params.append('type', filter.type)
+                if (filter.endDate) params.append('endDate', filter.endDate)
+                if (filter.status) params.append('status', filter.status)
+            const data = await api.get<ApiMostaUserActiveResponse>(`/transactions/analytics/active-users?${params.toString()}`)
             return data.data
         },
     })

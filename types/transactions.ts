@@ -63,9 +63,33 @@ export interface MostProductCell {
   unique_users:number
 }
 
+export interface MostUserActive {
+  deposit_amount: number
+  deposit_count: number
+  last_activity: string
+  topup_amount: number
+  topup_count: number
+  topup_profit: number
+  total_amount: number
+  total_transactions: number
+  username: string | null
+}
+
 export interface ApiMostResponse {
   success : boolean
   data: MostProductCell[]
+  meta: {
+    endDate: string
+    filters: {}
+    limit: number
+    startDate: string
+  }
+}
+
+
+export interface ApiMostaUserActiveResponse {
+  success : boolean
+  data: MostUserActive[]
   meta: {
     endDate: string
     filters: {}

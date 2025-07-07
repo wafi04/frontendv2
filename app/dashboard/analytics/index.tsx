@@ -111,22 +111,6 @@ export function AnalyticsTransactions() {
         })
     }
 
-    const getDateRangeLabel = () => {
-        if (currentFilter.startDate && currentFilter.endDate) {
-            const start = new Date(currentFilter.startDate).toLocaleDateString("id-ID", {
-                month: "short",
-                day: "numeric",
-                year: "numeric"
-            })
-            const end = new Date(currentFilter.endDate).toLocaleDateString("id-ID", {
-                month: "short",
-                day: "numeric",
-                year: "numeric"
-            })
-            return `${start} - ${end}`
-        }
-        return "All Time"
-    }
 
     const MetricCard = ({ title, value, change, icon: Icon, trend }: { title: string; value: string; change: string; icon: React.ElementType; trend: 'up' | 'down' }) => (
         <Card className="relative overflow-hidden">
