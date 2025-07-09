@@ -18,7 +18,6 @@ export function useGetServiceByCategoryAndSubCategory({
     queryFn: async () => {
       let url = `/service/category/${categoryId}`;
       
-      // Jika ada subCategoryId, tambahkan sebagai path parameter
       if (subCategoryId && subCategoryId > 0) {
         url += `/${subCategoryId}`;
       }

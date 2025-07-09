@@ -28,7 +28,6 @@ export function CartDetails() {
         whatsAppNumber,
         tax,
         discount,
-        resetOrder,
     } = useOrderStore();
 
     // Computed values
@@ -63,7 +62,6 @@ export function CartDetails() {
             voucherCode: voucherCode,
             zone: zone
         })
-        console.log("Action triggered");
     };
 
     // Helper functions
