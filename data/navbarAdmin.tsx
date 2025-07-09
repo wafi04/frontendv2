@@ -89,4 +89,9 @@ export const dataNavAdmin: NavItem[] = [
     path: "/dashboard/payment-method",
     icon: <Wallet className="size-4" />,
   },
+  {
+    nama: "Balance",
+    path: "/dashboard/balance",
+    icon: <Wallet className="size-4" />,
+  },
 ];
