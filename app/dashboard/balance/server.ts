@@ -21,3 +21,23 @@ export function useGetAllBalance(){
         error
     }
 }
+
+
+export function useGetHistoryBalance(id : number){
+      const {data,isLoading,error} = useQuery({
+        queryKey : ["balance-histories",id],
+        queryFn : async ()  => {
+            const  req = await api.get<API_RESPONSE<PlatformBalance[]>>(`/balance/${id}`)
+            return req.data
+        },
+        staleTime : 5 * 60 * 100,
+        gcTime : 5 * 60 * 100,
+    })
+
+
+    return {
+        data,
+        isLoading,
+        error
+    }
+}
