@@ -97,3 +97,37 @@ export interface ApiMostaUserActiveResponse {
     startDate: string
   }
 }
+
+export type Transaction = {
+  createdAt: string; // ISO date string
+  discount: number;
+  id: number;
+  isDigi: "true" | "false";
+  isReOrder: "true" | "false";
+  log: string;
+  message: string;
+  nickname: string;
+  orderId: string;
+  price: number;
+  profit: number;
+  profitAmount: number;
+  providerOrderId: string;
+  purchasePrice: number;
+  refId: string;
+  serialNumber: string;
+  serviceName: string;
+  status: "SUCCESS" | "FAILED" | "PENDING"; // Tambah status lain jika ada
+  successReportSent: "true" | "false";
+  transactionType: "digital_product" | string; // atau bikin enum jika banyak opsi
+  updatedAt: string; // ISO date string
+  userId: string;
+  username: string | null;
+  zone: string | null;
+  payment : {
+    buyerNumber: string
+    feeAmount: number
+    method: string
+    status: string
+    totalAmount: number
+  }
+};

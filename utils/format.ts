@@ -20,3 +20,12 @@ export function FormatPrice(price: number) {
 export const truncateText = (text: string, maxLength: number = 20): string => {
   return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
 };
+
+export const formatShortDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit'
+    }).replace(/\//g, '')
+}
