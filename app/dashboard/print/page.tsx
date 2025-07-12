@@ -109,7 +109,7 @@ export default function Page() {
         <>
             <HeaderDashboard title="Print Dashboard" desc="Print various reports and data with filters" />
 
-            <section className="p-6">
+            <section className="py-6">
                 {/* Filter Section */}
                 <Card className="mb-6">
                     <CardHeader>

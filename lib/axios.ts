@@ -15,6 +15,8 @@ interface RequestConfig {
 
 export class Api {
   private instance: AxiosInstance;
+ private isRefreshing = false;
+  private refreshPromise: Promise<any> | null = null;
 
   constructor() {
     this.instance = axios.create({
@@ -25,16 +27,41 @@ export class Api {
   
 
     this.instance.interceptors.response.use(
-      (response) => response,
-      (error: AxiosError) => {
-        const apiError: ApiError = {
-          message: error.message,
-          status: error.response?.status,
-          code: error.code,
-        };
-        return Promise.reject(apiError);
-      }
-    );
+      (response: AxiosResponse) => response,
+      async (error: AxiosError) => {
+        const originalRequest = error.config as any;
+
+        // Handle 401 errors with refresh token
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+
+          try {
+            if (!this.isRefreshing) {
+              this.isRefreshing = true;
+              this.refreshPromise = this.instance.post('/auth/refresh');
+            }
+
+            await this.refreshPromise;
+            
+            this.isRefreshing = false;
+            this.refreshPromise = null;
+
+            // Retry original request
+            return this.instance(originalRequest);
+          } catch (refreshError) {            
+            // Reset refresh state
+            this.isRefreshing = false;
+            this.refreshPromise = null;
+            
+            // Redirect to login
+            if (typeof window !== 'undefined') {
+              window.location.href = '/auth/login';
+            }
+            
+            return Promise.reject(refreshError);
+          }
+        }}
+        )
   }
 
   private formatData(data: unknown, isMultipart: boolean = false): unknown {

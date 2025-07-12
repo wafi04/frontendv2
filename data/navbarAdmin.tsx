@@ -81,11 +81,6 @@ export const dataNavAdmin: NavItem[] = [
     ],
   },
   {
-    nama: "Tracking",
-    path: "/dashboard/tracking",
-    icon: <PackageSearch className="size-4" />,
-  },
-  {
     nama: "Metode",
     path: "/dashboard/payment-method",
     icon: <Wallet className="size-4" />,

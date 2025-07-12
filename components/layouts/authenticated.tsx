@@ -17,7 +17,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
         if (isLoading) return;
 
         if (!isAuthenticated) {
-            router.push("/login");
+            router.push("/auth/login");
             return;
         }
 

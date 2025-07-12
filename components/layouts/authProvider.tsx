@@ -30,8 +30,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             // Clear user data from query cache
             await queryClient.removeQueries({ queryKey: ["user"] });
 
-            // Redirect to login page
-            window.location.href === "/login";
+            window.location.href === "/auth/login";
         } catch (err) {
             toast.error("failed to logout")
         }
