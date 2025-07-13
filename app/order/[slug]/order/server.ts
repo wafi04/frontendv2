@@ -16,20 +16,17 @@ interface CreateOrderTransation {
 
 
 interface OrderResponse {
-    data : {
-
-        amount : number
-        discount :  number
-        fee :  number
-        finalAmount :  number
-        orderId :  string
-        paymentMethod :  string
-        paymentUrl :  string
-        productName :  string
-        qrString : string
-        reference :  string
-        timestamp : string
-    }
+    amount : number
+    discount :  number
+    fee :  number
+    finalAmount :  number
+    orderId :  string
+    paymentMethod :  string
+    paymentUrl :  string
+    productName :  string
+    qrString : string
+    reference :  string
+    timestamp : string
 }
 
 export function useOrderCreate() {
@@ -39,6 +36,9 @@ export function useOrderCreate() {
         mutationKey: ['order'],
         mutationFn: async (data: CreateOrderTransation) => {
             const result = await api.post<API_RESPONSE<OrderResponse>>('/transactions/order', data)
+            if(result.data.success){
+                window.location.href = `/invoice?invoice=${result.data.data.orderId}`
+            }
             return result.data 
         },
         onSuccess: (data) => {

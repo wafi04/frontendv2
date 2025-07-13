@@ -40,9 +40,6 @@ const ErrorState = ({ nicknameData }: { nicknameData: NicknameResult | null }) =
         <span className="text-red-400 font-medium">
             Account tidak ditemukan
         </span>
-        <span className="text-red-100 text-sm">
-            {nicknameData?.message || "Tolong Check User ID and Server ID"}
-        </span>
     </div>
 );
 

@@ -29,7 +29,7 @@ import { PaymentSection } from "./DescriptionPayment"
 import { getStatusBadge, getStatusColor } from "@/components/custom/statusBadge"
 import { formatDate, FormatPrice } from "@/utils/format"
 import { ErrorState, LoadingSpinner } from "./custom"
-import { StatusAlert } from "./alertMessage"
+import { StatusAlert, StepIndicator } from "./alertMessage"
 import { Transaction } from "./types"
 import { DetailItem } from "./DetailsItem"
 import { QRCodeDisplay } from "./QrCode"
@@ -78,7 +78,7 @@ export default function InvoicePage() {
           className="space-y-6"
         >
           {/* Status Alert */}
-          <StatusAlert  status={transaction.status} />
+          <StepIndicator  currentStatus={transaction.status} />
 
           {/* Invoice Card */}
           <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
@@ -113,7 +113,7 @@ export default function InvoicePage() {
                   <div className="space-y-3">
                     <DetailItem
                       icon={Package}
-                      label="Layanan"
+                      label="Product"
                       value={transaction.serviceName}
                     />
                     
@@ -157,14 +157,16 @@ export default function InvoicePage() {
                       label="Metode Pembayaran"
                       value={transaction.payment.method}
                     />
-                    
-                    <DetailItem
+                    {
+                      !transaction.payment.method.toLowerCase().includes("qris") && (
+                  <DetailItem
                       icon={Hash}
                       label="Nomor Pembayaran"
                       value={transaction.payment.paymentNumber}
-                      copyable
                     />
-
+                      )
+                    }
+                  
                     <DetailItem
                       icon={Calendar}
                       label="Tanggal Transaksi"

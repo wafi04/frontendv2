@@ -27,7 +27,8 @@ export function FormTopupContent() {
     const [openDialog, setOpenDialog] = useState(false);
 
     const { data: methodData } = useGetPaymentMethods({
-        status: "active"
+        status: "active",
+        type : selectedPayment
     })
 
     const { baseAmount, taxAmount, totalAmount } = useMemo(() => {
@@ -139,17 +140,17 @@ export function FormTopupContent() {
                             <span className="text-muted-foreground">Nominal:</span>
                             <span>{FormatPrice(baseAmount)}</span>
                         </div>
-                        {/* {selectedBank?.code === "NQ" && (
+                        {selectedBank?.code === "NQ" && (
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">
-                                    Biaya Admin ({Math.round(TAX_RATE * 100)}%):
+                                    Jumlah Yang diterima
                                 </span>
-                                <span>{FormatPrice(taxAmount)}</span>
+                                <span>{FormatPrice(baseAmount - taxAmount)}</span>
                             </div>
-                        )} */}
+                        )}
                         <div className="flex justify-between font-semibold pt-2 border-t">
                             <span>Total:</span>
-                            <span>{FormatPrice(totalAmount)}</span>
+                            <span>{FormatPrice(baseAmount)}</span>
                         </div>
                     </div>
 

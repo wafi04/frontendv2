@@ -7,6 +7,7 @@ import { PaymentMethod } from "@/types/paymentMethod";
 import { useGetPaymentMethods } from "@/app/dashboard/payment-method/server";
 import { useOrderStore } from "@/hooks/useOrderStore";
 import { HeaderNumber } from "@/components/custom/headerNumber";
+import { PaymentUsingSaldo } from "./paymentSaldo";
 
 // Utility function untuk menghitung tax
 function calculateTax(
@@ -27,7 +28,7 @@ function calculateTax(
 
     return {
         taxAmount,
-        finalPrice: price,
+        finalPrice: price + taxAmount, // Fixed: should add tax to price
     };
 }
 
@@ -53,33 +54,18 @@ function PricePreview({
                 : "bg-muted/50 border-border/50"
                 }`}
         >
-            {/* <div className="flex items-center gap-1 mb-1">
-                <Calculator className="h-3 w-3 text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground">
-                    Biaya Admin
-                </span>
+            <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground">Harga dasar:</span>
+                <span>{FormatPrice(originalPrice)}</span>
+            </div>
+            {/* <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground">Biaya admin:</span>
+                <span>{FormatPrice(taxAmount)}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm font-medium border-t pt-1 mt-1">
+                <span>Total:</span>
+                <span className="text-primary">{FormatPrice(finalPrice)}</span>
             </div> */}
-
-            {/* <div className="space-y-1 text-xs">
-                <div className="flex justify-between">
-                    <span>Harga Produk:</span>
-                    <span>{FormatPrice(originalPrice)}</span>
-                </div>
-                <div className="flex justify-between text-orange-600">
-                    <span>
-                        Biaya Admin{" "}
-                        {method.taxType === "percentage"
-                            ? `(${method.taxAdmin}%)`
-                            : "(Fixed)"}
-                        :
-                    </span>
-                    <span>+{FormatPrice(taxAmount)}</span>
-                </div>
-                </div> */}
-            <span className="text-primary">{FormatPrice(finalPrice)}</span>
-            {/* <div className="flex justify-between font-medium  border-border/50"> */}
-            {/* <span>Total:</span> */}
-            {/* </div> */}
         </div>
     );
 }
@@ -113,13 +99,13 @@ export function MethodSection() {
     }, {} as Record<string, PaymentMethod[]>);
 
     // State to track which sections are expanded
-    const [expandedSections, setExpandedSections] = useState({});
+    const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
     const toggleSection = (section: string) => {
         if (shouldShowAlert) {
             return; // Don't allow expanding if no product selected
         }
-        setExpandedSections((prev: Record<string, boolean>) => ({
+        setExpandedSections((prev) => ({
             ...prev,
             [section]: !prev[section],
         }));
@@ -130,18 +116,24 @@ export function MethodSection() {
             return; // Don't allow selection if no product selected
         }
 
-        // Check if method minimum is higher than current price
         if (method.minAmount && method.minAmount > price) {
-            return; // Don't allow selection if price is below minimum
+            return;
         }
 
-        // Calculate final price with tax and update store
         const { finalPrice, taxAmount } = calculateTax(price, method);
         setMethod({
             code: method.code,
             name: method.name,
         });
         setFinalPrice(finalPrice);
+    };
+
+    const handleSaldoSubmit = () => {
+        setFinalPrice(price);
+        setMethod({
+            code: "SALDO",
+            name: "Saldo Akun"
+        });
     };
 
     if (isLoading)
@@ -161,41 +153,7 @@ export function MethodSection() {
         <div className="bg-card rounded-lg overflow-hidden shadow-lg border border-border">
             <HeaderNumber number={"3"} title="Metode Pembayaran" />
 
-            {/* Alert when no product selected */}
-            {shouldShowAlert && (
-                <div className="bg-amber-50 border-l-4 border-amber-400 p-4 m-4 rounded-r-lg">
-                    <div className="flex items-center">
-                        <AlertTriangle className="h-5 w-5 text-amber-400 mr-2" />
-                        <div>
-                            <p className="text-sm font-medium text-amber-800">
-                                Pilih Produk Terlebih Dahulu
-                            </p>
-                            <p className="text-xs text-amber-600 mt-1">
-                                Silakan pilih produk di section sebelumnya untuk melanjutkan
-                                pembayaran
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <div className="bg-card p-4 relative">
-                <div className="absolute top-4 right-4 bg-accent text-accent-foreground text-xs py-1 px-3 rounded-bl-lg font-medium">
-                    TERBAIK
-                </div>
-                <div
-                    className={`flex justify-between items-center p-4 rounded-lg shadow-md transition-colors ${shouldShowAlert ? "bg-gray-400/50 opacity-60" : "bg-blue-800/90"
-                        }`}
-                >
-                    <div className="flex items-center">
-                        <div className="w-10 h-10 bg-accent bg-opacity-20 rounded-full flex items-center justify-center mr-3 shadow-md">
-                            <span className="text-accent text-xl">🪙</span>
-                        </div>
-                        <span className="text-card-foreground font-medium">Saldo Akun</span>
-                    </div>
-                    <div className="text-chart-5 font-medium">Rp 0</div>
-                </div>
-            </div>
+            <PaymentUsingSaldo onSubmit={handleSaldoSubmit} />
 
             <div className="space-y-3 p-3">
                 {Object.keys(groupedMethods).map((type, index) => (
@@ -234,9 +192,7 @@ export function MethodSection() {
                                     className={`text-sm transition-transform duration-300 ${shouldShowAlert ? "text-gray-500" : "text-blue-200"
                                         }`}
                                     style={{
-                                        transform: expandedSections[
-                                            type as keyof typeof expandedSections
-                                        ]
+                                        transform: expandedSections[type]
                                             ? "rotate(180deg)"
                                             : "rotate(0deg)",
                                     }}
@@ -246,7 +202,7 @@ export function MethodSection() {
                             </div>
 
                             <div
-                                className={`${expandedSections[type as keyof typeof expandedSections]
+                                className={`${expandedSections[type]
                                     ? "hidden "
                                     : "flex"
                                     } w-full flex-wrap gap-4 p-4 justify-end`}
@@ -267,7 +223,7 @@ export function MethodSection() {
                             </div>
                         </div>
                         <div
-                            className={`bg-popover overflow-hidden transition-all duration-300 ease-in-out ${expandedSections[type as keyof typeof expandedSections]
+                            className={`bg-popover overflow-hidden transition-all duration-300 ease-in-out ${expandedSections[type]
                                 ? "max-h-screen opacity-100"
                                 : "max-h-0 opacity-0"
                                 }`}
@@ -286,7 +242,7 @@ export function MethodSection() {
                                                 key={idx}
                                                 onClick={() => handleMethodSelect(method)}
                                                 className={`p-3 relative w-full rounded-lg flex flex-col transition-all duration-200 border shadow-sm
-                            ${isMethodDisabled
+                                                ${isMethodDisabled
                                                         ? "cursor-not-allowed bg-gray-100 border-gray-200 opacity-50"
                                                         : isSelected
                                                             ? "border-primary bg-muted cursor-pointer"
