@@ -54,7 +54,6 @@ export function PaymentMethodsTable({ data }: { data: PaymentMethod[] }) {
                         <TableHead>Status</TableHead>
                         <TableHead>Tax</TableHead>
                         <TableHead>Amount Range</TableHead>
-                        <TableHead>Expired Range</TableHead>
                         <TableHead>Created At</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
@@ -66,16 +65,14 @@ export function PaymentMethodsTable({ data }: { data: PaymentMethod[] }) {
                             <TableCell>{item.name}</TableCell>
                             <TableCell>{item.code}</TableCell>
                             <TableCell>{item.type}</TableCell>
-                            <TableCell>{item.isActive}</TableCell>
+                            <TableCell>{item.status}</TableCell>
                             <TableCell>
-                                {item.taxAdmin}% ({item.taxType})
+                                {item.fee}% ({item.feeType})
                             </TableCell>
                             <TableCell>
                                 {item.minAmount} - {item.maxAmount}
                             </TableCell>
-                            <TableCell>
-                                {item.minExpired} - {item.maxExpired}
-                            </TableCell>
+                         
                             <TableCell>{formatDate(item.createdAt as string)}</TableCell>
                             <TableCell>
                                 <DropdownMenu>

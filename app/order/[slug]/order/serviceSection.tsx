@@ -1,25 +1,21 @@
 "use client";
-import { Flame, TrendingDown } from "lucide-react";
+import { Flame } from "lucide-react";
 import Image from "next/image";
 import { FormatPrice } from "@/utils/format";
 import { motion } from "framer-motion";
 import { SvgProduct } from "../../../../utils/svg";
-import { ServiceOrderData } from "@/types/service";
+import { ProductWithUserPrice} from "@/types/service";
 import { useScrollToMethod } from "@/components/layouts/scrollProductToMethod";
 import { useOrderStore } from "@/hooks/useOrderStore";
 import { toast } from "sonner";
 
 export function ProductPage({
     products,
-    role,
     placeholder
 }: {
-    role: string | null
-    products: ServiceOrderData[] | undefined
+    products: ProductWithUserPrice[] | undefined
     placeholder: string
 }) {
-
-
     return (
         <div className="max-h-[80vh] custom-scrollbar overflow-y-auto bg-background text-foreground p-4">
             {/* Products Grid */}
@@ -28,7 +24,6 @@ export function ProductPage({
                     <ProductCard
                         key={product.serviceName}
                         product={product}
-                        userRole={role}
                         placeholder={placeholder}
                     />
                 ))}
@@ -47,39 +42,16 @@ export function ProductPage({
 
 function ProductCard({
     product,
-    userRole,
     placeholder
 }: {
-    product: ServiceOrderData;
-    userRole: string | null;
+    product: ProductWithUserPrice
     placeholder: string;
 }) {
     const { setProduct, productDetails, setPrice, userId,setFinalPrice } = useOrderStore();
     const { scrollToMethod } = useScrollToMethod(); 
     const isSelected = product.providerId === productDetails.code;
 
-    // Calculate original price and discount
-    const getOriginalPrice = () => {
-        if (product.priceSuggest && product.priceSuggest > product.currentPrice) {
-            return product.priceSuggest;
-        }
-        return product.price
-    };
 
-    const originalPrice = getOriginalPrice();
-    const hasDiscount = originalPrice > product.currentPrice;
-    const discountAmount = originalPrice - product.currentPrice;
-    const discountPercentage = Math.round((discountAmount / originalPrice) * 100);
-
-    // Check if user gets special pricing
-    const hasSpecialPricing =
-        userRole && (userRole === "platinum" || userRole === "reseller");
-    const specialPricingLabel =
-        userRole === "platinum"
-            ? "platinum"
-            : userRole === "reseller"
-                ? "reseller"
-                : "";
 
     const handleProductClick = () => {
         if (!userId) {
@@ -90,8 +62,8 @@ function ProductCard({
             code: product.providerId,
             name: product.serviceName,
         });
-        setPrice(product.currentPrice);
-        setFinalPrice(product.currentPrice)
+        setPrice(product.userPrice);
+        setFinalPrice(product.userPrice)
 
         setTimeout(() => {
             scrollToMethod();
@@ -111,7 +83,7 @@ function ProductCard({
             <div className="px-2 py-5 flex-grow">
                 <div className="flex items-center justify-between">
                     <div className="flex-shrink-0">
-                        {product.productLogo ? (
+                        {/* {product.productLogo ? (
                             <Image
                                 width={50}
                                 height={50}
@@ -119,7 +91,7 @@ function ProductCard({
                                 alt={product.serviceName}
                                 className="w-12 h-12 object-contain rounded-md"
                             />
-                        ) : (
+                        ) : ( */}
                             <Image
                                 width={40}
                                 height={40}
@@ -127,7 +99,7 @@ function ProductCard({
                                 alt="Default Diamond"
                                 className="object-cover"
                             />
-                        )}
+                        {/* )} */}
                     </div>
 
                     {isSelected && (
@@ -148,31 +120,10 @@ function ProductCard({
                             {/* Current Price */}
                             <div className="flex items-center gap-2">
                                 <p className="font-semibold text-foreground">
-                                    {FormatPrice(product.currentPrice)}
-                                </p>
-
-                                {/* Special Pricing Badge */}
-                                {hasSpecialPricing && (
-                                    <span className="bg-amber-500/20 text-amber-400 text-xs px-1.5 py-0.5 rounded-full font-medium">
-                                        {specialPricingLabel}
-                                    </span>
-                                )}
+                                    {FormatPrice(product.userPrice)}
+                                </p>                            
                             </div>
 
-                            {/* Original Price (crossed out) & Discount */}
-                            {hasDiscount && (
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs text-muted-foreground line-through">
-                                        {FormatPrice(originalPrice)}
-                                    </span>
-                                    <div className="flex items-center gap-1 bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-full">
-                                        <TrendingDown size={10} />
-                                        <span className="text-xs font-medium">
-                                            Hemat {discountPercentage}%
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -195,13 +146,6 @@ function ProductCard({
             {product.isSuggest === "active" && (
                 <div className="absolute top-2 right-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-full z-10">
                     <span className="text-xs font-bold">REKOMENDASI</span>
-                </div>
-            )}
-
-            {/* Corner Ribbon for Big Discounts */}
-            {hasDiscount && discountPercentage >= 20 && (
-                <div className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
-                    -{discountPercentage}%
                 </div>
             )}
         </motion.div>

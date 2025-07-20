@@ -33,6 +33,7 @@ import { TableSkeleton } from "@/components/custom/tableSkeleton";
 import { SubCategory } from "@/types/subCategory";
 import { useFilter } from "@/hooks/usefilter";
 import { Pagination } from "@/components/custom/pagination";
+import { DialogDelete } from "@/components/custom/dialogDelete";
 
 export default function Page() {
     // Gunakan custom hook dengan unit name untuk Sub Categories
@@ -76,7 +77,6 @@ export default function Page() {
         search: search || undefined,
     });
 
-    console.log(data?.data.meta);
 
     const handleSearch = (value: string) => {
         setSearch(value); // Otomatis reset ke page 1
@@ -191,7 +191,7 @@ export default function Page() {
                             <TableHead>Code</TableHead>
                             <TableHead>Name</TableHead>
                             <TableHead>Category ID</TableHead>
-                            {/* <TableHead>Status</TableHead> */}
+                            <TableHead>Status</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -199,7 +199,7 @@ export default function Page() {
                     <TableBody>
                         {isLoading ? (
                             <TableSkeleton limit={limit} />
-                        ) : data?.data.data.length === 0 ? (
+                        ) : data?.data.data.length === 0  ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={6}
@@ -233,6 +233,9 @@ export default function Page() {
                                     <TableCell className="font-medium">{item.name}</TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {item.categoryId}
+                                    </TableCell>
+                                    <TableCell className="text-muted-foreground">
+                                        {item.status}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <DropdownMenu>
@@ -305,7 +308,7 @@ export default function Page() {
             )}
 
             {/* Delete Dialog */}
-            {/* {deletes.open && (
+            {deletes.open && (
                 <DialogDelete
                     open={deletes.open}
                     onClose={() => setDeleted({ open: false, id: deletes.id })}
@@ -313,7 +316,7 @@ export default function Page() {
                     desc="Are you sure you want to delete this sub category? This action cannot be undone."
                     onAction={handleDelete}
                 />
-            )} */}
+            )}
         </>
     );
 }

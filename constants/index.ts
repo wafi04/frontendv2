@@ -1,6 +1,6 @@
 export const URL_LOGO =
   "https://res.cloudinary.com/dstvymie8/image/upload/v1741104560/LOGO_VAZZ_STORE_2_dereyt.webp";
-export const BACKEND_URL = "http://localhost:3002/api/v1";
+export const BACKEND_URL = "http://localhost:8080/api";
 export const LAYANAN_PER_PAGE = 100;
 export const TAX_RATE = 0.007;
 export const MINIMUM_CUSTOM_AMOUNT = 1;

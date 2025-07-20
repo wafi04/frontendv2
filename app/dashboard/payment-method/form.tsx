@@ -53,16 +53,14 @@ export function FormPaymentMethod({
         defaultValues: {
             code: data?.code ?? "",
             description: data?.description ?? "",
-            maxExpired: data?.maxExpired ?? undefined,
             image: data?.image ?? "",
-            minExpired: data?.minExpired ?? undefined,
             minAmount: data?.minAmount ?? undefined,
             maxAmount: data?.maxAmount ?? undefined,
-            isActive: data?.isActive ?? "active",
+            isActive: data?.status ?? "active",
             type: data?.type ?? "",
-            taxType: (data?.taxType) ?? undefined,
+            feeType: (data?.feeType) ?? undefined,
             name: data?.name ?? "",
-            taxAdmin: data?.taxAdmin ?? undefined,
+            fee: data?.fee ?? undefined,
         },
         mode: "onChange",
     });
@@ -92,13 +90,10 @@ export function FormPaymentMethod({
                 fieldsToValidate = ["code", "name"];
                 break;
             case 2:
-                fieldsToValidate = ["taxType", "taxAdmin"];
+                fieldsToValidate = ["feeType", "fee"];
                 break;
             case 3:
                 fieldsToValidate = ["type", "minAmount", "maxAmount", "description"];
-                break;
-            case 4:
-                fieldsToValidate = ["minExpired", "maxExpired"];
                 break;
         }
 
@@ -217,7 +212,7 @@ export function FormPaymentMethod({
 
                                 <FormField
                                     control={form.control}
-                                    name="taxType"
+                                    name="feeType"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="flex items-center gap-1">
@@ -248,7 +243,7 @@ export function FormPaymentMethod({
 
                                 <FormField
                                     control={form.control}
-                                    name="taxAdmin"
+                                    name="fee"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="flex items-center gap-1">
@@ -266,7 +261,7 @@ export function FormPaymentMethod({
                                                 />
                                             </FormControl>
                                             <FormDescription>
-                                                {form.watch("taxType") === "PERCENTAGE"
+                                                {form.watch("feeType") === "PERCENTAGE"
                                                     ? "Enter percentage value (e.g. 10 => 10%)"
                                                     : "Enter flat amount"}
                                             </FormDescription>
@@ -381,73 +376,7 @@ export function FormPaymentMethod({
                                 </div>
                             </div>
                         )}
-
-                        {/* Step 4: Expiration Settings */}
-                        {step === 4 && (
-                            <div className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="minExpired"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="flex items-center gap-1">
-                                                    <Timer className="h-4 w-4" />
-                                                    Min Expiry (minutes)
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        type="number"
-                                                        placeholder="Enter minimum expiry time"
-                                                        {...field}
-                                                        onChange={(e) =>
-                                                            field.onChange(
-                                                                Number(e.target.value) || undefined
-                                                            )
-                                                        }
-                                                    />
-                                                </FormControl>
-                                                <FormDescription>
-                                                    Minimum time before payment expires
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="maxExpired"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="flex items-center gap-1">
-                                                    <Timer className="h-4 w-4" />
-                                                    Max Expiry (minutes)
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        type="number"
-                                                        placeholder="Enter maximum expiry time"
-                                                        {...field}
-                                                        onChange={(e) =>
-                                                            field.onChange(
-                                                                Number(e.target.value) || undefined
-                                                            )
-                                                        }
-                                                    />
-                                                </FormControl>
-                                                <FormDescription>
-                                                    Maximum time before payment expires
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
+                </div>
                     <div className="flex justify-between  pt-3">
                         <Button
                             type="button"

@@ -16,6 +16,7 @@ export function Navbar({ data, isLoading }: { data?: UserData | undefined, isLoa
         const { data: UserData } = useAuth()
         user = UserData?.data || undefined;
     }
+    console.log(user)
     return (
         <>
             <nav className="w-full h-16 px-4 py-3 backdrop-blur-sm sticky top-0 left-0 z-40 text-white">

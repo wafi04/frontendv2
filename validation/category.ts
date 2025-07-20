@@ -20,7 +20,7 @@ export const FormSubCategory = z.object({
   name: z.string(),
   categoryId: z.number(),
   code: z.string(),
-  isActive: z.string(),
+  status: z.string(),
 });
 
 export type FormValuesSubCategory = z.infer<typeof FormSubCategory>;

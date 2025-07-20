@@ -8,7 +8,7 @@ export type SubCategory = {
   updatedAt: string | null;
   code: string;
   categoryId: number;
-  isActive: string;
+  status: string;
 };
 
 

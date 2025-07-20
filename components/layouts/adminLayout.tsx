@@ -16,7 +16,7 @@ export function AdminLayout({
 
   return (
     <AuthProvider>
-      <ProtectedRoute requiredRole={["admin", "superadmin"]}>
+      <ProtectedRoute requiredRole={["ADMIN", "SUPER_ADMIN"]}>
         <div className="flex w-full min-h-screen">
           <SidebarAdminInternal
             className={className}

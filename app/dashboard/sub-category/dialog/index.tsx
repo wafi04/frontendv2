@@ -22,7 +22,7 @@ export default function DialogSubCategory({
                 <DialogDescription>
                     Create Sub Categories
                 </DialogDescription>
-                <FormSubCategory />
+                <FormSubCategory  initialData={data}/>
             </DialogContent>
         </Dialog>
     )

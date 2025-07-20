@@ -2,25 +2,32 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormValuesSubCategory } from "@/validation/category";
 import { useForm } from "react-hook-form";
-import { useCreateSubCategory } from "../server";
+import { useCreateSubCategory, useUpdateSubCategory } from "../server";
+import { SubCategory } from "@/types/subCategory";
 
-export default function FormSubCategory() {
+export default function FormSubCategory({initialData} : {initialData? : SubCategory}) {
     const {mutate}  = useCreateSubCategory()
+    const {mutate : updateMutate,isPending}  = useUpdateSubCategory()
     const form = useForm<FormValuesSubCategory>({
         defaultValues: {
-            categoryId: undefined,
-            code: "",
-            isActive: "active",
-            name: ""
+            categoryId: initialData?.categoryId ?? undefined,
+            code: initialData?.code ?? "",
+            status: initialData?.status ?? "active",
+            name: initialData?.name ?? ""
         }
     });
 
     const onSubmit = (data: FormValuesSubCategory) => {
-        console.log(data);
-        mutate(data)
+        if(initialData){
+            updateMutate({
+                data,
+                id : initialData.id
+            })
+        } else {
+            mutate(data)
+        }       
     };
 
     return (
@@ -96,7 +103,7 @@ export default function FormSubCategory() {
                         {/* Status Field */}
                         <FormField
                             control={form.control}
-                            name="isActive"
+                            name="status"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-sm font-medium text-gray-700">

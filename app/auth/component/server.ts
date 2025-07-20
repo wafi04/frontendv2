@@ -14,7 +14,6 @@ export function useHandleLogout() {
   return useMutation({
     mutationKey: ["logout"],
     mutationFn: async () => {
-      const token = localStorage.getItem("token");
       const response = await api.post(`/auth/logout`);
       return response.data;
     },
@@ -34,7 +33,11 @@ export const useRegisterMutation = () => {
   return useMutation({
     mutationKey: ["register"],
     mutationFn: async (data: RegisterAuth) => {
-      const res = await api.post("/auth/register", data);
+      const post = {
+        ...data,
+        whatsapp : data.whatsapp?.toString()
+      }
+      const res = await api.post("/auth/register",post);
       console.log(res);
       return res.data;
     },

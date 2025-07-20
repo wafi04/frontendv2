@@ -20,7 +20,7 @@ export function CategoriesAll() {
         limit: "12",
         page: page.toString(),
         status: "active",
-        search: filter
+        type: filter
     });
 
     // Reset when filter changes

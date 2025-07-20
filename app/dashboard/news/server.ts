@@ -155,10 +155,10 @@ export function useUpdateNews(id : number) {
 
 
 export function useGetAllNews({
-    search,
+    type,
     status
 }: {
-    search? : string
+    type? : string
     status? : 'active' | 'inactive' | 'all'
 }) {
     return useQuery({
@@ -166,7 +166,7 @@ export function useGetAllNews({
 
         queryFn: async () => {
             const searchParams = new URLSearchParams();
-                if (search) searchParams.set('search', search);
+                if (type) searchParams.set('type', type);
                 if (status) searchParams.set('status', status);
             const response = await api.get<API_RESPONSE<NewsData[]>>(`/news?${searchParams.toString()}`);
             return response.data;

@@ -34,13 +34,9 @@ export function useGetPaymentMethods(
       const queryString = searchParams.toString();
       const url = `/payment-methods${queryString ? `?${queryString}` : ""}`;
       
-      const res = await api.get<API_RESPONSE<PaymentMethod[]>>(url);
+      const res = await api.get<API_RESPONSE<{data : PaymentMethod[]}>>(url);
       
-      // Add basic error handling
-      if (!res.data.success) {
-        throw new Error(res.data.message || "Failed to fetch payment methods");
-      }
-      
+     
       return res.data.data;
     },
     enabled, // Control query execution

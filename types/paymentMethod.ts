@@ -1,17 +1,40 @@
 export interface PaymentMethod {
-  name: string;
   id: number;
-  type: string;
-  createdAt: string | null;
-  updatedAt: string | null;
   code: string;
-  image: string;
+  name: string;
   description: string;
-  minAmount: number | null;
-  taxType: string;
-  taxAdmin: number | null;
-  minExpired: number | null;
-  maxExpired: number | null;
-  maxAmount: number | null;
-  isActive: string
+  image: string;
+  type: string
+  minAmount: number;
+  maxAmount: number;
+  fee: number;
+  feeType: string
+  status: string;
+  createdAt: string; // ISO format or Date
+  updatedAt: string; // ISO format or Date
+}
+
+export interface CreateMethodData {
+  code: string;
+  name: string;
+  description?: string;
+  image: string;
+  type: string
+  minAmount: number;
+  maxAmount: number;
+  fee: number;
+  feeType: string
+  status: string;
+}
+
+export interface UpdateMethodData {
+  name?: string;
+  description?: string;
+  image: string;
+  type?: string
+  minAmount?: number;
+  maxAmount?: number;
+  fee?: number;
+  feeType?: string
+  status?: string;
 }

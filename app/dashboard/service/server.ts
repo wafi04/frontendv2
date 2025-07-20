@@ -1,14 +1,13 @@
 import { api } from "@/lib/axios";
 import { API_RESPONSE } from "@/types/response";
-import { ServiceOrderResponse } from "@/types/service";
+import { ProductWithUserPrice, ServiceOrderResponse } from "@/types/service";
 import { useQuery } from "@tanstack/react-query";
-
 
 
 
 export function useGetServiceByCategoryAndSubCategory({
   categoryId,
-  subCategoryId
+  subCategoryId,
 }: {
   categoryId: number;
   subCategoryId?: number;
@@ -16,13 +15,15 @@ export function useGetServiceByCategoryAndSubCategory({
   const { data, isLoading, error } = useQuery({
     queryKey: ["service", "category", categoryId, "subCategory", subCategoryId],
     queryFn: async () => {
-      let url = `/service/category/${categoryId}`;
-      
+      const params = new URLSearchParams();
+
       if (subCategoryId && subCategoryId > 0) {
-        url += `/${subCategoryId}`;
+        params.set("subCategoryId", subCategoryId.toString());
       }
-      
-      const response = await api.get<API_RESPONSE<ServiceOrderResponse>>(url);
+
+      const url = `/products?categoryId=${categoryId}${params.toString()}`;
+
+      const response = await api.get<API_RESPONSE<ProductWithUserPrice[]>>(url);
       return response.data;
     },
     gcTime: 1000 * 60 * 60,
@@ -35,8 +36,8 @@ export function useGetServiceByCategoryAndSubCategory({
   });
 
   return {
-    data: data?.data, // Mengakses data.data karena response wrapped
+    data: data?.data,
     isLoading,
-    error
+    error,
   };
 }

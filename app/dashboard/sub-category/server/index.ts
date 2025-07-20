@@ -31,7 +31,7 @@ export function useGetSubCategoryPagination(data: FilterSubCategories) {
       if (data.status) params.append('status', data.status)
 
       const response = await api.get<SubCategoryReseponseWithPagination>(
-        `/subcategory/pagination?${params.toString()}`
+        `/subcategories?${params.toString()}`
       )
       return response.data
     },
@@ -61,7 +61,7 @@ export function useCreateSubCategory() {
   return useMutation({
     mutationFn: async (data: FormValuesSubCategory) => {
       const response = await api.post<API_RESPONSE<SubCategory>>(
-        "/subcategory",
+        "/subcategories",
         data
       );
       return response.data;
@@ -96,7 +96,7 @@ export function useUpdateSubCategory() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: FormValuesSubCategory }) => {
       const response = await api.put<API_RESPONSE<SubCategory>>(
-        `/subcategory/${id}`,
+        `/subcategories/${id}`,
         data
       );
       return response.data;
@@ -139,7 +139,7 @@ export function useDeleteSubCategory() {
   return useMutation({
     mutationFn: async (id: number) => {
       const response = await api.delete<API_RESPONSE<SubCategory>>(
-        `/subcategory/${id}`
+        `/subcategories/${id}`
       );
       return response.data;
     },
@@ -170,7 +170,7 @@ export function useBulkDeleteSubCategories() {
   return useMutation({
     mutationFn: async (ids: number[]) => {
       const promises = ids.map(id => 
-        api.delete<API_RESPONSE<SubCategory>>(`/subcategory/${id}`)
+        api.delete<API_RESPONSE<SubCategory>>(`/subcategories/${id}`)
       );
       const responses = await Promise.all(promises);
       return responses.map(response => response.data);
@@ -193,36 +193,6 @@ export function useBulkDeleteSubCategories() {
   });
 }
 
-// PREFETCH SUBCATEGORY (for better UX)
-export function usePrefetchSubCategory() {
-  const queryClient = useQueryClient();
-  
-  return (id: number) => {
-    queryClient.prefetchQuery({
-      queryKey: ["subcategory", id],
-      queryFn: async () => {
-        const response = await api.get<API_RESPONSE<SubCategory>>(`/subcategory/${id}`);
-        return response.data;
-      },
-      staleTime: 5 * 60 * 1000,
-    });
-  };
-}
-
-// SEARCH SUBCATEGORIES (if you want to add search functionality)
-export function useSearchSubCategories(searchTerm: string) {
-  return useQuery({
-    queryKey: ["subcategories", "search", searchTerm],
-    queryFn: async () => {
-      const response = await api.get<API_RESPONSE<SubCategory[]>>(
-        `/subcategory?search=${encodeURIComponent(searchTerm)}`
-      );
-      return response.data;
-    },
-    enabled: searchTerm.length > 0,
-    staleTime: 30 * 1000, // 30 seconds for search results
-  });
-}
 
 // CUSTOM HOOK FOR FORM INTEGRATION
 export function useSubCategoryForm() {

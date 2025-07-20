@@ -9,28 +9,7 @@ import { useOrderStore } from "@/hooks/useOrderStore";
 import { HeaderNumber } from "@/components/custom/headerNumber";
 import { PaymentUsingSaldo } from "./paymentSaldo";
 
-// Utility function untuk menghitung tax
-function calculateTax(
-    price: number,
-    method: PaymentMethod
-): { taxAmount: number; finalPrice: number } {
-    if (!method.taxAdmin) {
-        return { taxAmount: 0, finalPrice: price };
-    }
 
-    let taxAmount = 0;
-
-    if (method.taxType === "PERCENTAGE") {
-        taxAmount = Math.max((price * method.taxAdmin) / 100);
-    } else {
-        taxAmount = method.taxAdmin;
-    }
-
-    return {
-        taxAmount,
-        finalPrice: price + taxAmount, // Fixed: should add tax to price
-    };
-}
 
 // Component untuk menampilkan price preview
 function PricePreview({
@@ -42,10 +21,7 @@ function PricePreview({
     method: PaymentMethod;
     isSelected: boolean;
 }) {
-    const { taxAmount, finalPrice } = calculateTax(originalPrice, method);
-    const hasTax = taxAmount > 0;
 
-    if (!hasTax) return null;
 
     return (
         <div
@@ -74,8 +50,9 @@ export function MethodSection() {
     const { data, isLoading, error } = useGetPaymentMethods({
         status: "active"
     })
+    console.log(data)
 
-    const methodData = data ?? [];
+    const methodData = data?.data ?? [];
     const {
         setMethod,
         method: metode,
@@ -84,7 +61,6 @@ export function MethodSection() {
         productDetails,
     } = useOrderStore();
 
-    // Check if product is selected and price is valid
     const isProductSelected = price > 0 && productDetails.code;
     const shouldShowAlert = !isProductSelected;
 
@@ -103,7 +79,7 @@ export function MethodSection() {
 
     const toggleSection = (section: string) => {
         if (shouldShowAlert) {
-            return; // Don't allow expanding if no product selected
+            return; 
         }
         setExpandedSections((prev) => ({
             ...prev,
@@ -120,12 +96,11 @@ export function MethodSection() {
             return;
         }
 
-        const { finalPrice, taxAmount } = calculateTax(price, method);
         setMethod({
             code: method.code,
             name: method.name,
         });
-        setFinalPrice(finalPrice);
+        setFinalPrice(price);
     };
 
     const handleSaldoSubmit = () => {
@@ -274,6 +249,7 @@ export function MethodSection() {
                                                         </div>
                                                     )}
 
+                                  
                                                     <div className="flex flex-col items-start min-w-0 flex-grow">
                                                         <span
                                                             className={`text-sm sm:text-md font-medium truncate w-full ${isMethodDisabled

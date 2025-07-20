@@ -19,18 +19,8 @@ export function useGetCategories() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
-export function useGetCategoriesByType(type: string) {
-  return useQuery({
-    queryKey: ["categories","type",type],
-    queryFn: async (): Promise<CategoryResponse> => {
-      const response = await api.get<API_RESPONSE<CategoryData[]>>(
-        `/category/type/${type}`
-      );
-      return response.data;
-    },
-    staleTime: 5 * 60 * 1000, 
-  });
-}
+
+
 export function useGetCategoryPagination(data: FilterCategories) {
   return useQuery({
     queryKey: ["categories", "pagination", data], // Include data in queryKey untuk auto-refetch
@@ -42,9 +32,11 @@ export function useGetCategoryPagination(data: FilterCategories) {
       if (data.page) params.append('page', data.page)
       if (data.search) params.append('search', data.search)
       if (data.status) params.append('status', data.status)
+      if (data.type) params.append('type', data.type)
+
 
       const response = await api.get<CategoryReseponseWithPagination>(
-        `/category/pagination?${params.toString()}`
+        `/categories?${params.toString()}`
       )
       return response.data
     },
@@ -59,7 +51,7 @@ export function useGetCategory(id: number) {
     queryKey: ["categories", id],
     queryFn: async (): Promise<SingleCategoryResponse> => {
       const response = await api.get<API_RESPONSE<CategoryData>>(
-        `/category/${id}`
+        `/categories/${id}`
       );
       return response.data;
     },
@@ -77,7 +69,7 @@ export function useCreateCategory() {
       data: FormValuesCategory
     ): Promise<SingleCategoryResponse> => {
       const response = await api.post<API_RESPONSE<CategoryData>>(
-        "/category",
+        "/categories",
         data
       );
       return response.data;
@@ -101,7 +93,7 @@ export function useUpdateCategory(id: number) {
 
   return useMutation({
     mutationFn: async (data: FormValuesCategory) => {
-      const response = await api.put(`/category/${id}`, data);
+      const response = await api.put(`/categories/${id}`, data);
       return response.data;
     },
     onSuccess: (data) => {
@@ -131,7 +123,7 @@ export function useDeleteCategory() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const response = await api.delete(`/category/${id}`);
+      const response = await api.delete(`/categories/${id}`);
       return response.data;
     },
     onSuccess: (data, deletedId) => {

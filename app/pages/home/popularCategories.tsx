@@ -1,21 +1,24 @@
 
 'use client';
-
-
 import { useState, useEffect, useCallback } from "react"
 import { Flame, Star } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from 'next/link';
-import { useGetCategoriesByType } from "@/app/dashboard/category/server/category";
 import { CategoryData } from "@/types/category";
 import { ParticlesEffect } from "@/components/custom/particlesEffect";
+import { useGetCategoryPagination } from "@/app/dashboard/category/server/category";
 
 export function PopularSection() {
-    const { data, isLoading } = useGetCategoriesByType("populer")
+    const { data, isLoading } = useGetCategoryPagination({
+        limit : "10",
+        page : "1",
+        status : "active",
+        type : "popular"
+    })
 
     // Safely access the data array
-    const categoriesData = data?.data || [] as CategoryData[]
+    const categoriesData = data?.data.data || [] as CategoryData[]
     const [activeIndex, setActiveIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
 

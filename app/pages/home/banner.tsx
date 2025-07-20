@@ -6,7 +6,7 @@ import { useGetAllNews } from "@/app/dashboard/news/server"
 export function BannerHomePage() {
     // Replace with your actual hook
     const { data, isLoading, error } = useGetAllNews({
-        search: "banner",
+        type: "banner",
         status: "active",
     })
 

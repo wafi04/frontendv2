@@ -28,7 +28,7 @@ export default function PaymentMethodPage() {
             {open && <DialogPaymentMethod onClose={() => setOpen(!open)} open={open} />}
 
             <div className="p-4">
-                <PaymentMethodsTable data={data ?? [] as PaymentMethod[]} />
+                <PaymentMethodsTable data={data?.data ?? [] as PaymentMethod[]} />
             </div>
         </>
     );

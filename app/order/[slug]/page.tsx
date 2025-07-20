@@ -25,7 +25,7 @@ export interface CategoryWithSubCategories extends CategoryData {
 }
 
 export default async function Page({ params }: { params: { slug: string | undefined } }) {
-    const request = await axios(`${BACKEND_URL}/category/code/${params.slug}`)
+    const request = await axios(`${BACKEND_URL}/categories/${params.slug}`)
     const dataCategoryCode = request.data.data as CategoryWithSubCategories
     return (
         <>

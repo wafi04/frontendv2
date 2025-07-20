@@ -19,7 +19,7 @@ export function OrderStep({ data }: { data: CategoryWithSubCategories }) {
     const { filter } = useFilterProduct()
     const { data: productData } = useGetServiceByCategoryAndSubCategory({
         categoryId: data.id,
-        subCategoryId: filter ?? 0,
+        subCategoryId: filter,
     })
     const methodSectionRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +49,7 @@ export function OrderStep({ data }: { data: CategoryWithSubCategories }) {
                 <div className="flex flex-col w-full rounded-lg overflow-hidden border-2">
                     <HeaderNumber number={"2"} title={"Pilih Product"} />
                     <HeaderFilterProduct subCategories={data.subCategories} />
-                    <ProductPage products={productData?.regularServices} role={productData?.role as string} placeholder={data.placeholder1} />
+                    <ProductPage products={productData}  placeholder={data.placeholder1} />
                 </div>
                 <div ref={methodSectionRef}>
                     <MethodSection />

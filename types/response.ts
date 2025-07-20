@@ -34,5 +34,6 @@ export interface PaginationParams {
 
 export interface FilterCategories extends PaginationParams {
   search?: string
+  type? : string
   status?: string
 }

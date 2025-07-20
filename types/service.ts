@@ -20,6 +20,20 @@ export type ServiceOrderData = {
     serviceName: string;
     suggestInfo: any | null;
 }
+
+export type ProductWithUserPrice = {
+  categoryId: number;
+  subCategoryId: number;
+  serviceName: string;
+  providerId : string
+  userPrice: number;
+  userProfit: number;
+  isSuggest: "active" | "inactive";
+  isFlashSale: "active" | "inactive";
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+};
+
 export type ServiceOrderResponse = {
     flashSaleServices: ServiceOrderData[] | []
     hasFlashSale: boolean
