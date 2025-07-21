@@ -1,4 +1,5 @@
-import { getTypeVariant } from "@/components/custom/badgeStatus";
+import { Fragment, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -8,13 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { RecentTransactions } from "@/types/transactions";
-import { formatDate, FormatPrice, truncateText } from "@/utils/format";
-import { getStatusVariant } from "@/utils/statusHelper";
-import { Fragment, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { DialogRetransaction } from "./DialogRetransactions";
+
+// Utilities & Types
+import { getTypeVariant } from "@/components/custom/badgeStatus"; // Assuming this handles transactionType variants
+import { getStatusVariant } from "@/utils/statusHelper"; // Assuming this handles transaction status variants
+import { formatDate, FormatPrice, truncateText } from "@/utils/format";
+import { RecentTransactions } from "@/types/transactions"; // Your transaction type definition
+import { ExpandedTransactionDetails } from "./expand";
+
+// Sub-component for expanded row content
 
 interface TableRecentTransactionsProps {
   transactions: RecentTransactions[];
@@ -23,16 +27,16 @@ interface TableRecentTransactionsProps {
 export const TableRecentTransactions: React.FC<
   TableRecentTransactionsProps
 > = ({ transactions }) => {
-  const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
-  const toggleExpand = (id: number) => {
-    setExpandedRowId((prev) => (prev === id ? null : id));
+  const toggleExpand = (orderId: string) => {
+    setExpandedRowId((prev) => (prev === orderId ? null : orderId));
   };
 
-  console.log(transactions)
+  // console.log(transactions); // Hapus atau jadikan komentar console.log ini di produksi
 
   return (
-    <div className="rounded-md border mt-10">
+    <div className="mt-10 rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -60,39 +64,42 @@ export const TableRecentTransactions: React.FC<
               <Fragment key={transaction.id}>
                 <TableRow className="hover:bg-muted/50">
                   <TableCell className="font-mono text-sm">
-                    <div className="">
+                    {/* Menggunakan div untuk flex agar truncateText bisa bekerja lebih baik */}
+                    <div className="flex items-center">
                       <span
-                        className="block truncate cursor-pointer"
-                        title={transaction.order_id}
+                        className="block truncate max-w-[100px] cursor-pointer" // Max width added for better truncation control
+                        title={transaction.orderId}
                       >
-                        {transaction.order_id}
+                        {transaction.orderId}
                       </span>
                     </div>
                   </TableCell>
 
                   <TableCell>
-                    <div className="space-y-1 max-w-[200px]">
-                      <div className="font-medium text-sm leading-tight">
-                        {truncateText(transaction.service_name, 50)}
+                    <div className="max-w-[200px] space-y-1">
+                      <div className="text-sm font-medium leading-tight">
+                        {truncateText(transaction.serviceName, 50)}
                       </div>
                       {transaction.nickname && (
                         <div className="text-xs text-muted-foreground">
                           {truncateText(transaction.nickname, 20)}
                         </div>
                       )}
-                        <div className="text-xs text-muted-foreground">
-                          {transaction.user_id}-{transaction.zone}
-                        </div>
+                      <div className="text-xs text-muted-foreground">
+                        {transaction.userId}
+                        {transaction.zone ? `-${transaction.zone}` : ""}
+                      </div>
                     </div>
                   </TableCell>
 
                   <TableCell>
-                    <div className="space-y-1 max-w-[150px]">
-                      <div className="font-medium text-sm">
-                        {transaction.username ?? "Anonymous"}
-                      </div>
-                      <div className="text-xs text-muted-foreground font-mono">
-                        {transaction.buyer_number}
+                    <div className="max-w-[150px] space-y-1">
+                      <div className="text-sm font-medium">
+                        {transaction.username || "Anonymous"}
+                      </div>{" "}
+                      {/* Gunakan || untuk fallback */}
+                      <div className="font-mono text-xs text-muted-foreground">
+                        {transaction.paymentDetail.buyerNumber}
                       </div>
                     </div>
                   </TableCell>
@@ -100,40 +107,38 @@ export const TableRecentTransactions: React.FC<
                   <TableCell>
                     <div className="max-w-[140px] space-y-1">
                       <span
-                        className="block text-sm truncate"
-                        title={transaction.payment_method}
+                        className="block truncate text-sm"
+                        title={transaction.paymentDetail.method}
                       >
-                        {transaction.payment_method}
+                        {transaction.paymentDetail.method}
                       </span>
                     </div>
                   </TableCell>
 
                   <TableCell>
                     <Badge
-                      variant={getTypeVariant(transaction.transaction_type)}
+                      variant={getTypeVariant(transaction.transactionType)}
                       className="text-xs"
                     >
-                      {transaction.transaction_type}
+                      {transaction.transactionType}
                     </Badge>
                   </TableCell>
 
                   <TableCell className="text-right font-medium">
-                    <p className="space-y-1">
-                      {FormatPrice(transaction.total_amount)}
-                    </p>
+                    {FormatPrice(transaction.paymentDetail.totalAmount)}
                   </TableCell>
 
                   <TableCell className="text-right font-medium">
                     <span
                       className={
-                        transaction.profit_amount > 0
+                        transaction.profitAmount > 0
                           ? "text-green-600"
-                          : transaction.profit_amount < 0
+                          : transaction.profitAmount < 0
                           ? "text-red-600"
                           : ""
                       }
                     >
-                      {FormatPrice(transaction.profit_amount)}
+                      {FormatPrice(transaction.profitAmount)}
                     </span>
                   </TableCell>
 
@@ -148,12 +153,15 @@ export const TableRecentTransactions: React.FC<
 
                   <TableCell className="text-sm text-muted-foreground">
                     <div className="min-w-[120px]">
-                      <div>{formatDate(transaction.created_at)}</div>
-                      {transaction.updated_at !== transaction.created_at && (
-                        <div className="text-xs text-muted-foreground">
-                          {formatDate(transaction.updated_at)}
-                        </div>
-                      )}
+                      <div>{formatDate(transaction.createdAt)}</div>
+                      {/* Hanya tampilkan updated_at jika berbeda dari created_at */}
+                      {transaction.updatedAt &&
+                        new Date(transaction.updatedAt).getTime() !==
+                          new Date(transaction.createdAt).getTime() && (
+                          <div className="text-xs text-muted-foreground">
+                            {formatDate(transaction.updatedAt)}
+                          </div>
+                        )}
                     </div>
                   </TableCell>
 
@@ -161,10 +169,10 @@ export const TableRecentTransactions: React.FC<
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => toggleExpand(transaction.id)}
+                      onClick={() => toggleExpand(transaction.orderId)}
                       className="flex items-center gap-1"
                     >
-                      {expandedRowId === transaction.id ? (
+                      {expandedRowId === transaction.orderId ? (
                         <>
                           <ChevronUp size={16} />
                           Collapse
@@ -179,73 +187,12 @@ export const TableRecentTransactions: React.FC<
                   </TableCell>
                 </TableRow>
 
-               {expandedRowId === transaction.id && (
-                  <TableRow className="">
-                    <TableCell colSpan={10} >
-                      <div className="mx-6 my-4 p-6 bg-card  dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full"></div>
-                          <h4 className="font-semibold text-lg ">
-                            Transaction Details
-                          </h4>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                          <DetailCard
-                            icon="💰"
-                            label="Fee"
-                            value={FormatPrice(transaction.fee_amount)}
-                            color="orange"
-                          />
-                          <DetailCard
-                            icon="🛒"
-                            label="Harga Beli"
-                            value={FormatPrice(transaction.purchase_price ?? 0)}
-                            color="blue"
-                          />
-                          <DetailCard
-                            icon="💸"
-                            label="Harga Jual"
-                            value={FormatPrice(transaction.price)}
-                            color="green"
-                          />
-                          <DetailCard
-                            icon="📈"
-                            label="Profit"
-                            value={FormatPrice(transaction.profit_amount)}
-                            color={transaction.profit_amount > 0 ? "green" : "red"}
-                          />
-                          <DetailCard
-                            icon="🎯"
-                            label="Nomor Tujuan"
-                            value={`${transaction.user_id}${transaction.zone ? `-${transaction.zone}` : ""}`}
-                            color="green"
-                          />
-                          <DetailCard
-                            icon="🔗"
-                            label="Transaction ID"
-                            value={transaction.order_id}
-                            color="gray"
-                          />
-                          <DialogRetransaction orderId={transaction.order_id}/>
-                        </div>
-
-                        {transaction.log && (
-                          <div className="mt-6 p-4  rounded-lg ">
-                            <div className="flex items-center gap-2 mb-3">
-                              <span className="text-lg">📝</span>
-                              <h5 className="font-semibold text-gray-900 dark:text-gray-100">
-                                Transaction Log
-                              </h5>
-                            </div>
-                            <div className=" dark:bg-gray-900 rounded-md p-3 border border-gray-200 dark:border-gray-600">
-                              <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">
-                                {transaction.log}
-                              </pre>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                {/* Expanded Row for Details */}
+                {expandedRowId === transaction.orderId && (
+                  <TableRow>
+                    <TableCell colSpan={10} className="p-0 border-none">
+                      {/* Panggil komponen baru untuk detail yang diperluas */}
+                      <ExpandedTransactionDetails transaction={transaction} />
                     </TableCell>
                   </TableRow>
                 )}
@@ -259,51 +206,3 @@ export const TableRecentTransactions: React.FC<
 };
 
 export default TableRecentTransactions;
-
-function DetailCard({ 
-  icon, 
-  label, 
-  value, 
-  color = "gray" 
-}: { 
-  icon: string;
-  label: string; 
-  value: string;
-  color?: "blue" | "green" | "red" | "orange" | "purple" | "gray";
-}) {
-  const colorClasses = {
-    blue: "from-blue-500/10 to-blue-600/10 border-blue-200 dark:border-blue-800",
-    green: "from-green-500/10 to-green-600/10 border-green-200 dark:border-green-800",
-    red: "from-red-500/10 to-red-600/10 border-red-200 dark:border-red-800",
-    orange: "from-orange-500/10 to-orange-600/10 border-orange-200 dark:border-orange-800",
-    purple: "from-purple-500/10 to-purple-600/10 border-purple-200 dark:border-purple-800",
-    gray: "from-gray-500/10 to-gray-600/10 border-gray-200 dark:border-gray-800",
-  };
-
-  const iconColorClasses = {
-    blue: "bg-blue-100 dark:bg-blue-900",
-    green: "bg-green-100 dark:bg-green-900",
-    red: "bg-red-100 dark:bg-red-900",
-    orange: "bg-orange-100 dark:bg-orange-900",
-    purple: "bg-purple-100 dark:bg-purple-900",
-    gray: "bg-gray-100 dark:bg-gray-900",
-  };
-
-  return (
-    <div className={`p-4 rounded-xl bg-gradient-to-br ${colorClasses[color]} border hover:shadow-md transition-all duration-200`}>
-      <div className="flex items-start gap-3">
-        <div className={`p-2 rounded-lg ${iconColorClasses[color]} text-lg flex-shrink-0`}>
-          {icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-            {label}
-          </div>
-          <div className="text-lg font-semibold text-white truncate" title={value}>
-            {value}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}

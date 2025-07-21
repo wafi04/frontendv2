@@ -2,30 +2,39 @@ import { PaginationMeta } from "./category";
 
 export type RecentTransactions = {
   id: number;
-  order_id: string;
-  user_id: string;
+  orderId: string;
+  userId: string;
   username: string | null;
   nickname: string | null;
-  buyer_number: string;
   zone: string;
-  service_name: string;
+  serviceName: string;
   price: number;
   discount: number | null;
-  fee: number | null;
-  fee_amount: number;
   profit: number;
-  profit_amount: number;
-  purchase_price: number | null;
-  total_amount: number;
-  transaction_type: "DEPOSIT" | "MEMBERSHIP" | "TOPUP";
-  payment_method: string;
-  payment_number: string;
-  is_digi: string;
+  profitAmount: number;
+  purchasePrice: number | null;
+  transactionType: "DEPOSIT" | "MEMBERSHIP" | "TOPUP";
   status: string;
+  paymentDetail : Payments
   log: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 };
+
+export interface Payments {
+  orderId: string,
+  price: number,
+  totalAmount: number,
+  paymentNumber: string,
+  buyerNumber: string,
+  fee: number,
+  feeAmount: number,
+  status: string,
+  method: string,
+  reference: string | null,
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface RecentTransactionsPagination {
   data : RecentTransactions[]
