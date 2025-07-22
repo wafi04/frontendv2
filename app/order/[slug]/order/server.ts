@@ -35,7 +35,11 @@ export function useOrderCreate() {
     return useMutation({
         mutationKey: ['order'],
         mutationFn: async (data: CreateOrderTransation) => {
-            const result = await api.post<API_RESPONSE<OrderResponse>>('/transactions/order', data)
+            const validatedData = {
+                ...data,
+                whatsapp : data.whatsAppNumber
+            }
+            const result = await api.post<API_RESPONSE<OrderResponse>>('/transactions', validatedData)
             if(result.data.success){
                 window.location.href = `/invoice?invoice=${result.data.data.orderId}`
             }
