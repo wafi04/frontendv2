@@ -7,7 +7,7 @@ export function QRCodeDisplay({ paymentNumber, method }: QRCodeDisplayProps) {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
   
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(paymentNumber)}`
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent("00020101021226670016COM.NOBUBANK.WWW01189360050300000862280214106234590641420303UKE51440014ID.CO.QRIS.WWW0215ID20243419456300303UKE520458165303360540155802ID5913VAZZ UNIVERSE6009TANGERANG61051582062560114421434029119640619NQ25TITHVY64IKJINUO0703A010804POSP63046A2A")}`
   
   if (!method.toLowerCase().includes("qris")) return null
   

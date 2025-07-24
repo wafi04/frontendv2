@@ -1,7 +1,16 @@
-
+// orderId": "VAZZ17533665894845731360000",
+//     "discount": 0,
+//     "userId": "139600730",
+//     "zone": "2706",
+//     "status": "PENDING",
+//     "createdAt": "2025-07-24T14:16:29.484846Z",
+//     "totalAmount": 5,
+//     "paymentStatus": "PENDING",
+//     "method": "QRIS (All Payment)",
+//     "updatedAt": "2025-07-24T14:16:29.484846Z"
 export interface Transaction {
   createdAt: string
-  message: string
+  // message: string
   nickname: string | null
   orderId: string
   price: number
@@ -16,6 +25,9 @@ export interface Transaction {
     method: string
     paymentNumber: string
   }
+      method: string
+
+  paymentStatus : string
   zone: string | null
 }
 

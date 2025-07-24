@@ -155,10 +155,10 @@ export default function InvoicePage() {
                     <DetailItem
                       icon={CreditCard}
                       label="Metode Pembayaran"
-                      value={transaction.payment.method}
+                      value={transaction.method}
                     />
                     {
-                      !transaction.payment.method.toLowerCase().includes("qris") && (
+                      !transaction.method.toLowerCase().includes("qris") && (
                   <DetailItem
                       icon={Hash}
                       label="Nomor Pembayaran"
@@ -183,15 +183,15 @@ export default function InvoicePage() {
               </div>
 
               {/* QR Code Display for QRIS */}
-              {transaction.payment.method.toLowerCase().includes("qris") && (
+              {transaction.method.toLowerCase().includes("qris") && (
                 <QRCodeDisplay
-                  paymentNumber={transaction.payment.paymentNumber}
-                  method={transaction.payment.method}
+                  paymentNumber={transaction.method}
+                  method={transaction.method}
                 />
               )}
 
               {/* Message */}
-              {transaction.message && (
+              {/* {transaction.message && (
                 <div className="p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
                   <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
                     <FileText className="w-4 h-4" />
@@ -201,7 +201,7 @@ export default function InvoicePage() {
                     {transaction.message}
                   </p>
                 </div>
-              )}
+              )} */}
 
               {/* Price Summary */}
               <div className="flex justify-between items-center p-4 bg-muted/30 rounded-lg border mt-6">
