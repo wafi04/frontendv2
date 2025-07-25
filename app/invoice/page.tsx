@@ -66,7 +66,7 @@ export default function InvoicePage() {
   }
 
   const transaction: Transaction = data.data
-
+  console.log(transaction)
   return (
     <>
       <Navbar />
@@ -162,7 +162,7 @@ export default function InvoicePage() {
                   <DetailItem
                       icon={Hash}
                       label="Nomor Pembayaran"
-                      value={transaction.payment.paymentNumber}
+                      value={transaction.paymentNumber}
                     />
                       )
                     }
@@ -185,7 +185,7 @@ export default function InvoicePage() {
               {/* QR Code Display for QRIS */}
               {transaction.method.toLowerCase().includes("qris") && (
                 <QRCodeDisplay
-                  paymentNumber={transaction.method}
+                  paymentNumber={transaction.paymentNumber}
                   method={transaction.method}
                 />
               )}
@@ -206,7 +206,7 @@ export default function InvoicePage() {
               {/* Price Summary */}
               <div className="flex justify-between items-center p-4 bg-muted/30 rounded-lg border mt-6">
                 <span className="font-semibold">Total Pembayaran</span>
-                <span className="text-xl font-bold text-primary">{FormatPrice(transaction.price)}</span>
+                <span className="text-xl font-bold text-primary">{FormatPrice(transaction.totalAmount)}</span>
                 </div>
             </div>
           </div>

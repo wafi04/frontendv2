@@ -23,10 +23,10 @@ export interface Transaction {
   payment: {
     status: string
     method: string
-    paymentNumber: string
   }
-      method: string
-
+  totalAmount : number
+  method: string
+  paymentNumber: string
   paymentStatus : string
   zone: string | null
 }
