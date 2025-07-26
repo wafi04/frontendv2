@@ -12,7 +12,7 @@ export function StatusAlert({ status }: { status: string }) {
           icon: CheckCircle,
           iconColor: 'text-green-600',
         }
-      case 'FAILED':
+      case 'GAGAL':
         return {
           variant: 'destructive' as const,
           title: 'Transaksi Gagal',
@@ -69,7 +69,7 @@ export function StepIndicator({ currentStatus }: { currentStatus: string }) {
     const currentIndex = steps.findIndex(step => step.key === currentStatus.toUpperCase())
     const stepIndex = steps.findIndex(step => step.key === stepKey)
     
-    if (currentStatus.toUpperCase() === 'FAILED') {
+    if (currentStatus.toUpperCase() === 'GAGAL') {
       return stepIndex <= 1 ? 'completed' : 'failed'
     }
     

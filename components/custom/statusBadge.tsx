@@ -17,7 +17,7 @@ export const getStatusBadge = (status: string) => {
                     Pending
                 </Badge>
             )
-        case "FAILED":
+        case "GAGAL":
             return (
                 <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
                     <XCircle className="h-3 w-3 mr-1" />
@@ -46,7 +46,7 @@ export const getStatusColor = (status: string) => {
             return 'bg-green-50 text-green-700 border-green-200'
         case 'PENDING':
             return 'bg-yellow-50 text-yellow-700 border-yellow-200'
-        case 'FAILED':
+        case 'GAGAL':
             return 'bg-red-50 text-red-700 border-red-200'
         case 'DELETED':
             return 'bg-gray-50 text-gray-700 border-gray-200'
