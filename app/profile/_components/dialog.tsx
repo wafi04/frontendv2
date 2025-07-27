@@ -41,16 +41,14 @@ export function DialogDepositAndMembership({
         try {
             const payload = {
                 amount,
-                tax,
-                totalAmount,
-                code: payment.code,
-                type,
+                method: payment.code,
             };
             const req = await api.post<any>('/deposit', payload);
             const data = await req.data;
             console.log(data)
             if (data.success) {
                 toast.success("create deposit successfully");
+                window.location.href = `/profile/invoice?depositId=${data.data.depositId}`
             }
             return req.data;
         } catch (error) {
@@ -73,16 +71,16 @@ export function DialogDepositAndMembership({
                         <p className="font-medium">{payment.name}</p>
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Harga : </p>
+                        <p className="text-sm text-muted-foreground">Deposit : </p>
                         <p className="font-medium">{FormatPrice(amount)}</p>
                     </div>
                     <div>
-                        <p className="text-sm text-muted-foreground">Fee : </p>
-                        <p className="font-medium">{FormatPrice(tax)}</p>
+                        <p className="text-sm text-muted-foreground">Jumlah yang diterima : </p>
+                        <p className="font-medium">{FormatPrice(amount - tax)}</p>
                     </div>
                     <div>
                         <p className="text-sm text-muted-foreground">Total : </p>
-                        <p className="font-medium">{FormatPrice(totalAmount)}</p>
+                        <p className="font-medium">{FormatPrice(amount)}</p>
                     </div>
                 </div>
                 <DialogFooter className="flex flex-row justify-between items-center gap-3 ">

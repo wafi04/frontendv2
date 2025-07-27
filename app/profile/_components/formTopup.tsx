@@ -15,40 +15,41 @@ import { DialogDepositAndMembership } from "./dialog";
 import { useGetPaymentMethods } from "@/app/dashboard/payment-method/server";
 import { BankSection, BankSelect } from "./bank";
 
+// Tambahkan tipe untuk metode pembayaran yang kena pajak
+
 export function FormTopupContent() {
-    const [selectedNominal, setSelectedNominal] = useState<string | null>(
-        "50000"
-    );
+    const [selectedNominal, setSelectedNominal] = useState<string | null>("50000");
     const [customNominal, setCustomNominal] = useState("");
-    const [selectedPayment, setSelectedPayment] = useState<
-        PaymentMethodCode | undefined
-    >(undefined);
+    const [selectedPayment, setSelectedPayment] = useState<PaymentMethodCode | undefined>(undefined);
     const [selectedBank, setSelectedBank] = useState<BankMethod | null>(null);
     const [openDialog, setOpenDialog] = useState(false);
 
     const { data: methodData } = useGetPaymentMethods({
         status: "active",
-        type : selectedPayment
-    })
+        type: selectedPayment
+    });
 
     const { baseAmount, taxAmount, totalAmount } = useMemo(() => {
         const finalNominal = selectedNominal || customNominal;
         if (!finalNominal) return { baseAmount: 0, taxAmount: 0, totalAmount: 0 };
 
         const numericAmount = Number(finalNominal);
-        if (isNaN(numericAmount))
-            return { baseAmount: 0, taxAmount: 0, totalAmount: 0 };
+        if (isNaN(numericAmount)) return { baseAmount: 0, taxAmount: 0, totalAmount: 0 };
 
-        const tax = Math.round(numericAmount * TAX_RATE);
-        const total =
-            selectedBank?.code === "NQ" ? numericAmount + tax : numericAmount;
+        const isTaxedMethod = selectedBank && selectedBank.code === "M2"
+        
+        const tax = isTaxedMethod ? Math.round(numericAmount * TAX_RATE) : 0;
+        const total = numericAmount + tax;
 
-        return { baseAmount: numericAmount, taxAmount: tax, totalAmount: total };
+        return { 
+            baseAmount: numericAmount, 
+            taxAmount: tax, 
+            totalAmount: total,
+            isTaxed: isTaxedMethod
+        };
     }, [selectedNominal, customNominal, selectedBank]);
 
-    const handleCustomNominalChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
+    const handleCustomNominalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/\D/g, "");
         setCustomNominal(value);
         if (value) setSelectedNominal(null);
@@ -64,11 +65,8 @@ export function FormTopupContent() {
         setSelectedBank(null);
     };
 
-    const isCustomNominalValid =
-        !customNominal || Number(customNominal) >= MINIMUM_CUSTOM_AMOUNT;
-    const isFormValid =
-        selectedBank &&
-        (selectedNominal || (customNominal && isCustomNominalValid));
+    const isCustomNominalValid = !customNominal || Number(customNominal) >= MINIMUM_CUSTOM_AMOUNT;
+    const isFormValid = selectedBank && (selectedNominal || (customNominal && isCustomNominalValid));
 
     return (
         <>
@@ -81,9 +79,7 @@ export function FormTopupContent() {
                             <Button
                                 key={option.value}
                                 type="button"
-                                variant={
-                                    selectedNominal === option.value ? "default" : "outline"
-                                }
+                                variant={selectedNominal === option.value ? "default" : "outline"}
                                 onClick={() => handleNominalSelect(option.value)}
                                 className="w-full py-3 text-sm font-medium transition-colors"
                             >
@@ -93,9 +89,7 @@ export function FormTopupContent() {
                     </div>
 
                     <div className="mt-4 space-y-2">
-                        <Label className="text-sm font-medium">
-                            Atau Masukkan Nominal Lain
-                        </Label>
+                        <Label className="text-sm font-medium">Atau Masukkan Nominal Lain</Label>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                                 Rp
@@ -105,14 +99,12 @@ export function FormTopupContent() {
                                 placeholder="Masukkan nominal (minimal 1.000)"
                                 value={customNominal}
                                 onChange={handleCustomNominalChange}
-                                className={`pl-10 ${!isCustomNominalValid ? "border-destructive" : ""
-                                    }`}
+                                className={`pl-10 ${!isCustomNominalValid ? "border-destructive" : ""}`}
                             />
                         </div>
                         {!isCustomNominalValid && (
                             <p className="text-destructive text-sm">
-                                Nominal minimal Rp{" "}
-                                {MINIMUM_CUSTOM_AMOUNT.toLocaleString("id-ID")}
+                                Nominal minimal Rp {MINIMUM_CUSTOM_AMOUNT.toLocaleString("id-ID")}
                             </p>
                         )}
                     </div>
@@ -125,9 +117,9 @@ export function FormTopupContent() {
                 />
 
                 {/* Bank Selection */}
-                {selectedPayment && methodData && methodData.length > 0 && (
+                {selectedPayment && methodData && methodData.data.length > 0 && (
                     <BankSection
-                        methodData={methodData}
+                        methodData={methodData.data}
                         selectedBank={selectedBank}
                         setSelectedBank={setSelectedBank}
                     />
@@ -140,26 +132,28 @@ export function FormTopupContent() {
                             <span className="text-muted-foreground">Nominal:</span>
                             <span>{FormatPrice(baseAmount)}</span>
                         </div>
-                        {selectedBank?.code === "NQ" && (
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                    Jumlah Yang diterima
-                                </span>
-                                <span>{FormatPrice(baseAmount - taxAmount)}</span>
-                            </div>
+                        
+                        {selectedBank?.code === "M2" && (
+                            <>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Jumlah Yang Diterima:</span>
+                                    <span>{FormatPrice(baseAmount - taxAmount)}</span>
+                                </div>
+                            </>
                         )}
+                        
                         <div className="flex justify-between font-semibold pt-2 border-t">
-                            <span>Total:</span>
+                            <span>Total Pembayaran:</span>
                             <span>{FormatPrice(baseAmount)}</span>
                         </div>
                     </div>
 
                     <Button
-                        className="w-full py-6 text-md "
+                        className="w-full py-6 text-md"
                         onClick={() => setOpenDialog(true)}
                         disabled={!isFormValid}
                     >
-                        Lanjutkan Deposit - {FormatPrice(totalAmount)}
+                        Lanjutkan Deposit - {FormatPrice(baseAmount)}
                     </Button>
                 </div>
             </div>

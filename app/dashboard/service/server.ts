@@ -3,8 +3,6 @@ import { API_RESPONSE } from "@/types/response";
 import { ProductWithUserPrice, ServiceOrderResponse } from "@/types/service";
 import { useQuery } from "@tanstack/react-query";
 
-
-
 export function useGetServiceByCategoryAndSubCategory({
   categoryId,
   subCategoryId,

@@ -1,8 +1,10 @@
 import {
   ClipboardList,
+  History,
   LayoutDashboard,
   Package,
   PackageSearch,
+  PartyPopper,
   Printer,
   Settings,
   ShoppingCart,
@@ -31,10 +33,6 @@ export const dataNavAdmin: NavItem[] = [
         path: "/dashboard/transactions",
       },
       {
-        nama: "Logs transactions",
-        path: "/dashboard/logs",
-      },
-      {
         nama: "Manual Transactions",
         path: "/dashboard/manual-transactions",
       },
@@ -47,10 +45,6 @@ export const dataNavAdmin: NavItem[] = [
       {
         nama: "Member Deposit",
         path: "/dashboard/deposit",
-      },
-      {
-        nama: "Analytics User",
-        path: "/dashboard/member/analytics",
       },
       {
         nama: "Kelola Member",
@@ -86,9 +80,24 @@ export const dataNavAdmin: NavItem[] = [
     icon: <Wallet className="size-4" />,
   },
   {
-    nama: "Balance",
-    path: "/dashboard/balance",
-    icon: <Wallet className="size-4" />,
+    nama: "Event",
+    path: "/dashboard/event",
+    icon: <PartyPopper className="size-4" />,
+     children: [
+      {
+        nama: "Messages",
+        path: "/dashboard/event/messages",
+      },
+      {
+        nama: "Membership",
+        path: "/dashboard/event/memberships",
+      }
+    ],
+  },
+  {
+    nama: "History",
+    path: "/dashboard/history",
+    icon: <History className="size-4" />,
   },
   {
     nama: "Printer",

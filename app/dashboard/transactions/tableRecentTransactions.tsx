@@ -33,7 +33,6 @@ export const TableRecentTransactions: React.FC<
     setExpandedRowId((prev) => (prev === orderId ? null : orderId));
   };
 
-  // console.log(transactions); // Hapus atau jadikan komentar console.log ini di produksi
 
   return (
     <div className="mt-10 rounded-md border">

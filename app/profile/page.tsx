@@ -1,5 +1,4 @@
 "use client"
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,20 +8,32 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import CardProfile from "./_components/cardProfile";
 import { FormTopupContent } from "./_components/formTopup";
-import { TableDeposit } from "./_components/tableDeposit";
+import { LoadingOverlay } from "@/components/custom/loadingOverlay";
+import { useGetDepositByusername } from "./_components/server";
+import DepositHistory from "./_components/depositHistory";
+import { DepositData } from "./invoice/page";
+import { PaginationMeta } from "@/types/category";
+import { TransactionsHistory } from "./_components/transactionhistory";
 
 export default function Page() {
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
     const [activeTab, setActiveTab] = useState("deposit");
     const router = useRouter();
     const { data, error, isLoading } = useAuth()
     const userData = data?.data
+   
+    
+    if(isLoading){
+        return <LoadingOverlay />
+    }
     return (
         <main className="container mx-auto px-4 py-8 max-w-7xl">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-min">
                 {/* Profile Card - Spans 1 column */}
-                <CardProfile user={userData} />
+                {
+                    userData && (
+                        <CardProfile user={userData} />
+                    )
+                }
 
                 {/* Balance Card - Spans 3 columns */}
                 <Card className="md:col-span-3 p-6">
@@ -57,15 +68,14 @@ export default function Page() {
                         value={activeTab}
                         onValueChange={(value) => {
                             setActiveTab(value);
-                            if (value === "history") {
-                                setCurrentPage(1);
-                            }
+                            
                         }}
                     >
                         <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="deposit">Deposit</TabsTrigger>
-                            <TabsTrigger value="membership">Membership</TabsTrigger>
-                            <TabsTrigger value="history">Transaction History</TabsTrigger>
+                            <TabsTrigger value="deposit">Top Up</TabsTrigger>
+                            <TabsTrigger value="deposithistory">Deposit History</TabsTrigger>
+                                                        <TabsTrigger value="history">Transaction History</TabsTrigger>
+
                         </TabsList>
 
                         {/* Deposit Tab */}
@@ -79,20 +89,6 @@ export default function Page() {
                                         <FormTopupContent />
                                     </CardContent>
                                 </Card>
-                                <Card className="max-h-[50vh] overflow-y-auto custom-scrollbar">
-                                    <CardHeader>
-                                        <CardTitle>Riwayat Deposit</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <TableDeposit />
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </TabsContent>
-
-                        {/* Membership Tab */}
-                        <TabsContent value="membership">
-                            <div className="flex flex-col w-full md:flex-row gap-6">
                                 <Card className="w-full md:max-w-[50%] max-h-[50vh] overflow-y-auto custom-scrollbar">
                                     <CardHeader>
                                         <CardTitle>Pilih Membership</CardTitle>
@@ -101,42 +97,16 @@ export default function Page() {
                                         {/* <MembershipContent /> */}
                                     </CardContent>
                                 </Card>
-                                <Card className="max-h-[50vh] overflow-y-auto custom-scrollbar">
-                                    <CardHeader>
-                                        <CardTitle>Riwayat Membership</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        {/* <TableMembership /> */}
-                                    </CardContent>
-                                </Card>
                             </div>
                         </TabsContent>
 
+                    
                         {/* Transaction History Tab */}
+                        <TabsContent value="deposithistory">
+                            <DepositHistory username={data?.data.username}  />
+                        </TabsContent>
                         <TabsContent value="history">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Riwayat Transactions</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    {/* <TableProfileTopup purchases={user?.pembelian as any[]} /> */}
-                                </CardContent>
-                                <CardFooter className="flex items-center pt-6 w-full">
-                                    {/* {pagination && (
-                                        <PaginationComponent
-                                            currentPage={currentPage}
-                                            pagination={{
-                                                hasNextPage: user.pagination.hasNextPage,
-                                                hasPreviousPage: user.pagination.hasPrevPage,
-                                                totalCount: user.pagination.totalItems,
-                                                totalPages: user.pagination.totalPages,
-                                            }}
-                                            perPage={10}
-                                            setCurrentPage={() => handlePageChange(currentPage)}
-                                        />
-                                    )} */}
-                                </CardFooter>
-                            </Card>
+                            <TransactionsHistory username={data?.data.username}/>
                         </TabsContent>
                     </Tabs>
                 </div>

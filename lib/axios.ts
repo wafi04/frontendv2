@@ -35,32 +35,15 @@ export class Api {
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
-          try {
-            if (!this.isRefreshing) {
-              this.isRefreshing = true;
-              this.refreshPromise = this.instance.post('/auth/refresh');
-            }
-
-            await this.refreshPromise;
-            
-            this.isRefreshing = false;
-            this.refreshPromise = null;
-
-            // Retry original request
-            return this.instance(originalRequest);
-          } catch (refreshError) {            
-            // Reset refresh state
-            this.isRefreshing = false;
-            this.refreshPromise = null;
+         
             
             // Redirect to login
             if (typeof window !== 'undefined') {
               window.location.href = '/auth/login';
             }
             
-            return Promise.reject(refreshError);
-          }
-        }}
+            return Promise.reject()
+          }}
         )
   }
 
@@ -106,7 +89,7 @@ export class Api {
         headers: this.getHeaders(config),
       });
       return {
-                success : response.success,
+        success : response.success,
         data: response.data,
         code: response.status,
         message: response.statusText,

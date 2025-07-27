@@ -18,9 +18,9 @@ export const NOMINAL_OPTIONS = [
 ] as const;
 
 export const PAYMENT_METHODS = [
-  { value: "virtual-account", label: "Virtual Account", icon: "🏦" },
-  { value: "e-wallet", label: "E-Wallet", icon: "💳" },
-  { value: "qris", label: "QRIS", icon: "📱" },
+  { value: "VIRTUAL ACCOUNT", label: "Virtual Account", icon: "🏦" },
+  { value: "E-WALLET", label: "E-Wallet", icon: "💳" },
+  { value: "QRIS", label: "QRIS", icon: "📱" },
 ] as const;
 
 export type PaymentMethodCode = (typeof PAYMENT_METHODS)[number]["value"];

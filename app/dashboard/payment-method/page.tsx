@@ -15,7 +15,6 @@ export default function PaymentMethodPage() {
         return null
     }
 
-    console.log(data)
     return (
         <>
             <HeaderDashboard

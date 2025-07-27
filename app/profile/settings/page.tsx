@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { User, Shield, Settings } from "lucide-react";
-import { SessionContent } from "./Session";
 import { EditProfileContent } from "./editProfile";
 
 
@@ -15,12 +14,6 @@ export default function SettingsPage() {
             label: "Edit Profile",
             icon: User,
             component: EditProfileContent
-        },
-        {
-            id: "session",
-            label: "Session",
-            icon: Shield,
-            component: SessionContent
         }
     ];
 
